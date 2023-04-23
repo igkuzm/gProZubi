@@ -16,7 +16,7 @@
 #include "support.h"
 
 #include "patientList.h"
-//#include "doctorList.h"
+#include "doctorList.h"
 
 void clear_columns(GtkWidget *mainWindow){
 	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
@@ -36,9 +36,10 @@ void
 on_patientListButton_clicked           (GtkButton       *button,
                                         gpointer         user_data)
 {
-	//GtkWidget *mainWindow = user_data;
-	//clear_columns(mainWindow);
-	//patient_list_new(mainWindow);
+	GtkWidget *mainWindow = lookup_widget(user_data, "mainWindow");;
+	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
+	clear_columns(mainWindow);
+	patient_list_new(mainWindow, p);
 }
 
 
@@ -46,9 +47,10 @@ void
 on_doctorListButton_clicked            (GtkButton       *button,
                                         gpointer         user_data)
 {
-	//GtkWidget *mainWindow = user_data;
-	//clear_columns(mainWindow);
-	//doctor_list_new(mainWindow);
+	GtkWidget *mainWindow = lookup_widget(user_data, "mainWindow");;
+	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
+	clear_columns(mainWindow);
+	doctor_list_new(mainWindow, p);
 }
 
 

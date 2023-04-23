@@ -291,6 +291,7 @@ static
 GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
+	g_object_set_data(delegate, "prozubi", p);
 
 	/* get treeView */
 	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");

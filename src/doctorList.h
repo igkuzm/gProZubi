@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 01.04.2023
+ * Last Modified Date: 23.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,7 +12,7 @@
 #include <gtk/gtk.h>
 #include "support.h"
 
-#include "/Users/kuzmich/src/prozubilib/prozubilib.h"
+#include "prozubilib/prozubilib.h"
 
 enum {
   DOCTOR_LIST_COLUMN_FIO,
@@ -35,23 +35,19 @@ GtkListStore *doctor_list_table_model_new(){
 }
 
 static
-void doctor_list_store_add(GtkListStore *store, struct doctor * doctor){
+void doctor_list_store_add(GtkListStore *store, struct doctor_t * doctor){
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 
 			DOCTOR_LIST_COLUMN_FIO,   doctor->fio,
 			DOCTOR_LIST_COLUMN_TEL,   doctor->tel,
-			DOCTOR_LIST_COLUMN_EMAIL, doctor->calendar,
+			DOCTOR_LIST_COLUMN_EMAIL, doctor->eventcalendar,
 			DOCTOR_LIST_POINTER,      doctor,
 	-1);
 }
 
 static
-int doctor_list_fill_table(struct doctor * doctor, void *userdata, char *error){
-	if (error) {
-		g_print("ERROR: %s\n", error);
-		return 0;
-	}
+int doctor_list_fill_table(void *userdata, struct doctor_t * doctor){
 
 	GObject *delegate = userdata;
 	GtkListStore *store = g_object_get_data(delegate, "doctorListStore");	
@@ -72,7 +68,7 @@ gboolean doctor_list_table_model_free(GtkTreeModel* model, GtkTreePath* path,
 }
 
 static
-void doctor_list_update(GObject * delegate){
+void doctor_list_update(GObject * delegate, prozubi_t *p){
 	g_print("Update doctorList\n");
 	GtkListStore *store = g_object_get_data(delegate, "doctorListStore");	
 
@@ -88,7 +84,7 @@ void doctor_list_update(GObject * delegate){
 	gtk_list_store_clear(store);
 	
 	/* get list of patients */
-	prozubilib_get_doctors(delegate, doctor_list_fill_table);
+	prozubi_doctor_foreach(p, delegate, doctor_list_fill_table);
 }
 
 static
@@ -213,7 +209,7 @@ void doctor_list_ask_to_remove_responce(
 }
 
 static
-void doctor_list_ask_to_remove(GObject *delegate, struct doctor * doctor) {
+void doctor_list_ask_to_remove(GObject *delegate, struct doctor_t * doctor) {
 	if (!doctor){
 		g_print("doctor is NULL\n");
 		return;
@@ -251,7 +247,7 @@ void doctor_list_ask_to_remove(GObject *delegate, struct doctor * doctor) {
 }
 
 static
-GtkWidget *doctor_list_new(GtkWidget *mainWindow){
+GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
 
@@ -266,7 +262,7 @@ GtkWidget *doctor_list_new(GtkWidget *mainWindow){
 	GtkListStore *store = doctor_list_table_model_new();
 	g_object_set_data(delegate, "doctorListStore", store);
 
-	doctor_list_update(delegate);
+	doctor_list_update(delegate, p);
 
 	/* set tree model for view */
 	//GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
