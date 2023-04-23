@@ -31,19 +31,213 @@ create_mainWindow (void)
 {
   GtkWidget *mainWindow;
   AtkObject *atko;
-  GtkWidget *handlebox1;
+  GtkWidget *hpaned1;
+  GtkWidget *vbox1;
+  GtkWidget *patientListButton;
+  GtkWidget *alignment1;
+  GtkWidget *hbox1;
+  GtkWidget *image1;
+  GtkWidget *label1;
+  GtkWidget *doctorListButton;
+  GtkWidget *alignment2;
+  GtkWidget *hbox2;
+  GtkWidget *image2;
+  GtkWidget *label2;
+  GtkWidget *priceListButton;
+  GtkWidget *alignment3;
+  GtkWidget *hbox3;
+  GtkWidget *image3;
+  GtkWidget *label3;
+  GtkWidget *hseparator1;
+  GtkWidget *configButton;
+  GtkWidget *alignment4;
+  GtkWidget *hbox4;
+  GtkWidget *image4;
+  GtkWidget *label4;
+  GtkWidget *vbox2;
+  GtkWidget *toolbar1;
+  GtkIconSize tmp_toolbar_icon_size;
+  GtkWidget *mailToButton;
+  GtkWidget *toolbutton2;
+  GtkWidget *toolbutton3;
+  GtkWidget *toolbutton4;
+  GtkWidget *toolbutton5;
+  GtkWidget *toolbutton6;
+  GtkWidget *separatortoolitem1;
+  GtkWidget *toolitem1;
+  GtkWidget *entry1;
+  GtkWidget *scrolledwindow1;
+  GtkWidget *mainTreeView;
 
   mainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (mainWindow, 640, 480);
   gtk_window_set_title (GTK_WINDOW (mainWindow), _("ProZubi"));
 
-  handlebox1 = gtk_handle_box_new ();
-  gtk_widget_show (handlebox1);
-  gtk_container_add (GTK_CONTAINER (mainWindow), handlebox1);
+  hpaned1 = gtk_hpaned_new ();
+  gtk_widget_show (hpaned1);
+  gtk_container_add (GTK_CONTAINER (mainWindow), hpaned1);
+  gtk_paned_set_position (GTK_PANED (hpaned1), 0);
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox1);
+  gtk_paned_pack1 (GTK_PANED (hpaned1), vbox1, FALSE, TRUE);
+
+  patientListButton = gtk_button_new ();
+  gtk_widget_show (patientListButton);
+  gtk_box_pack_start (GTK_BOX (vbox1), patientListButton, FALSE, FALSE, 0);
+
+  alignment1 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment1);
+  gtk_container_add (GTK_CONTAINER (patientListButton), alignment1);
+
+  hbox1 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox1);
+  gtk_container_add (GTK_CONTAINER (alignment1), hbox1);
+
+  image1 = gtk_image_new_from_stock ("gtk-orientation-portrait", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image1);
+  gtk_box_pack_start (GTK_BOX (hbox1), image1, FALSE, FALSE, 0);
+
+  label1 = gtk_label_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \320\277\320\260\321\206\320\270\320\265\320\275\321\202\320\276\320\262"));
+  gtk_widget_show (label1);
+  gtk_box_pack_start (GTK_BOX (hbox1), label1, FALSE, FALSE, 0);
+
+  doctorListButton = gtk_button_new ();
+  gtk_widget_show (doctorListButton);
+  gtk_box_pack_start (GTK_BOX (vbox1), doctorListButton, FALSE, FALSE, 0);
+
+  alignment2 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment2);
+  gtk_container_add (GTK_CONTAINER (doctorListButton), alignment2);
+
+  hbox2 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox2);
+  gtk_container_add (GTK_CONTAINER (alignment2), hbox2);
+
+  image2 = gtk_image_new_from_stock ("gtk-orientation-landscape", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image2);
+  gtk_box_pack_start (GTK_BOX (hbox2), image2, FALSE, FALSE, 0);
+
+  label2 = gtk_label_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \321\201\320\276\321\202\321\200\321\203\320\264\320\275\320\270\320\272\320\276\320\262"));
+  gtk_widget_show (label2);
+  gtk_box_pack_start (GTK_BOX (hbox2), label2, FALSE, FALSE, 0);
+
+  priceListButton = gtk_button_new ();
+  gtk_widget_show (priceListButton);
+  gtk_box_pack_start (GTK_BOX (vbox1), priceListButton, FALSE, FALSE, 0);
+
+  alignment3 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment3);
+  gtk_container_add (GTK_CONTAINER (priceListButton), alignment3);
+
+  hbox3 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox3);
+  gtk_container_add (GTK_CONTAINER (alignment3), hbox3);
+
+  image3 = gtk_image_new_from_stock ("gtk-justify-fill", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image3);
+  gtk_box_pack_start (GTK_BOX (hbox3), image3, FALSE, FALSE, 0);
+
+  label3 = gtk_label_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \321\203\321\201\320\273\321\203\320\263 (\320\277\321\200\320\260\320\271\321\201)"));
+  gtk_widget_show (label3);
+  gtk_box_pack_start (GTK_BOX (hbox3), label3, FALSE, FALSE, 0);
+
+  hseparator1 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator1);
+  gtk_box_pack_start (GTK_BOX (vbox1), hseparator1, TRUE, TRUE, 0);
+
+  configButton = gtk_button_new ();
+  gtk_widget_show (configButton);
+  gtk_box_pack_start (GTK_BOX (vbox1), configButton, FALSE, FALSE, 0);
+
+  alignment4 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment4);
+  gtk_container_add (GTK_CONTAINER (configButton), alignment4);
+
+  hbox4 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox4);
+  gtk_container_add (GTK_CONTAINER (alignment4), hbox4);
+
+  image4 = gtk_image_new_from_stock ("gtk-preferences", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image4);
+  gtk_box_pack_start (GTK_BOX (hbox4), image4, FALSE, FALSE, 0);
+
+  label4 = gtk_label_new_with_mnemonic (_("\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270"));
+  gtk_widget_show (label4);
+  gtk_box_pack_start (GTK_BOX (hbox4), label4, FALSE, FALSE, 0);
+
+  vbox2 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox2);
+  gtk_paned_pack2 (GTK_PANED (hpaned1), vbox2, TRUE, TRUE);
+
+  toolbar1 = gtk_toolbar_new ();
+  gtk_widget_show (toolbar1);
+  gtk_box_pack_start (GTK_BOX (vbox2), toolbar1, FALSE, FALSE, 0);
+  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar1), GTK_TOOLBAR_BOTH);
+  tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1));
+
+  mailToButton = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (mailToButton);
+  gtk_container_add (GTK_CONTAINER (toolbar1), mailToButton);
+
+  toolbutton2 = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (toolbutton2);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton2);
+
+  toolbutton3 = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (toolbutton3);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton3);
+
+  toolbutton4 = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (toolbutton4);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton4);
+
+  toolbutton5 = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (toolbutton5);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton5);
+
+  toolbutton6 = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  gtk_widget_show (toolbutton6);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton6);
+
+  separatortoolitem1 = (GtkWidget*) gtk_separator_tool_item_new ();
+  gtk_widget_show (separatortoolitem1);
+  gtk_container_add (GTK_CONTAINER (toolbar1), separatortoolitem1);
+
+  toolitem1 = (GtkWidget*) gtk_tool_item_new ();
+  gtk_widget_show (toolitem1);
+  gtk_container_add (GTK_CONTAINER (toolbar1), toolitem1);
+
+  entry1 = gtk_entry_new ();
+  gtk_widget_show (entry1);
+  gtk_container_add (GTK_CONTAINER (toolitem1), entry1);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry1), 9679);
+
+  scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow1);
+  gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
+
+  mainTreeView = gtk_tree_view_new ();
+  gtk_widget_show (mainTreeView);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow1), mainTreeView);
+  gtk_tree_view_set_reorderable (GTK_TREE_VIEW (mainTreeView), TRUE);
 
   g_signal_connect ((gpointer) mainWindow, "destroy",
                     G_CALLBACK (gtk_main_quit),
                     NULL);
+  g_signal_connect_swapped ((gpointer) patientListButton, "clicked",
+                            G_CALLBACK (on_patientListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) doctorListButton, "clicked",
+                            G_CALLBACK (on_doctorListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) priceListButton, "clicked",
+                            G_CALLBACK (on_priceListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) configButton, "clicked",
+                            G_CALLBACK (on_configButton_clicked),
+                            GTK_OBJECT (mainWindow));
 
   atko = gtk_widget_get_accessible (mainWindow);
   atk_object_set_name (atko, _("ProZubi"));
@@ -52,7 +246,42 @@ create_mainWindow (void)
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
   GLADE_HOOKUP_OBJECT_NO_REF (mainWindow, mainWindow, "mainWindow");
-  GLADE_HOOKUP_OBJECT (mainWindow, handlebox1, "handlebox1");
+  GLADE_HOOKUP_OBJECT (mainWindow, hpaned1, "hpaned1");
+  GLADE_HOOKUP_OBJECT (mainWindow, vbox1, "vbox1");
+  GLADE_HOOKUP_OBJECT (mainWindow, patientListButton, "patientListButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, alignment1, "alignment1");
+  GLADE_HOOKUP_OBJECT (mainWindow, hbox1, "hbox1");
+  GLADE_HOOKUP_OBJECT (mainWindow, image1, "image1");
+  GLADE_HOOKUP_OBJECT (mainWindow, label1, "label1");
+  GLADE_HOOKUP_OBJECT (mainWindow, doctorListButton, "doctorListButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, alignment2, "alignment2");
+  GLADE_HOOKUP_OBJECT (mainWindow, hbox2, "hbox2");
+  GLADE_HOOKUP_OBJECT (mainWindow, image2, "image2");
+  GLADE_HOOKUP_OBJECT (mainWindow, label2, "label2");
+  GLADE_HOOKUP_OBJECT (mainWindow, priceListButton, "priceListButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, alignment3, "alignment3");
+  GLADE_HOOKUP_OBJECT (mainWindow, hbox3, "hbox3");
+  GLADE_HOOKUP_OBJECT (mainWindow, image3, "image3");
+  GLADE_HOOKUP_OBJECT (mainWindow, label3, "label3");
+  GLADE_HOOKUP_OBJECT (mainWindow, hseparator1, "hseparator1");
+  GLADE_HOOKUP_OBJECT (mainWindow, configButton, "configButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, alignment4, "alignment4");
+  GLADE_HOOKUP_OBJECT (mainWindow, hbox4, "hbox4");
+  GLADE_HOOKUP_OBJECT (mainWindow, image4, "image4");
+  GLADE_HOOKUP_OBJECT (mainWindow, label4, "label4");
+  GLADE_HOOKUP_OBJECT (mainWindow, vbox2, "vbox2");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbar1, "toolbar1");
+  GLADE_HOOKUP_OBJECT (mainWindow, mailToButton, "mailToButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton2, "toolbutton2");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton3, "toolbutton3");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton4, "toolbutton4");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton5, "toolbutton5");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton6, "toolbutton6");
+  GLADE_HOOKUP_OBJECT (mainWindow, separatortoolitem1, "separatortoolitem1");
+  GLADE_HOOKUP_OBJECT (mainWindow, toolitem1, "toolitem1");
+  GLADE_HOOKUP_OBJECT (mainWindow, entry1, "entry1");
+  GLADE_HOOKUP_OBJECT (mainWindow, scrolledwindow1, "scrolledwindow1");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainTreeView, "mainTreeView");
 
   return mainWindow;
 }

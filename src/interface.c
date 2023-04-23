@@ -57,18 +57,17 @@ create_mainWindow (void)
   GtkWidget *vbox2;
   GtkWidget *toolbar1;
   GtkIconSize tmp_toolbar_icon_size;
-  GtkWidget *tmp_image;
   GtkWidget *mailToButton;
   GtkWidget *toolbutton2;
   GtkWidget *toolbutton3;
   GtkWidget *toolbutton4;
   GtkWidget *toolbutton5;
   GtkWidget *toolbutton6;
-  GtkWidget *toolbutton7;
+  GtkWidget *separatortoolitem1;
   GtkWidget *toolitem1;
-  GtkWidget *comboboxentry1;
+  GtkWidget *entry1;
   GtkWidget *scrolledwindow1;
-  GtkWidget *mainTreeview;
+  GtkWidget *mainTreeView;
 
   mainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (mainWindow, 640, 480);
@@ -177,9 +176,7 @@ create_mainWindow (void)
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar1), GTK_TOOLBAR_BOTH);
   tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1));
 
-  tmp_image = gtk_image_new_from_stock ("gtk-index", tmp_toolbar_icon_size);
-  gtk_widget_show (tmp_image);
-  mailToButton = (GtkWidget*) gtk_tool_button_new (tmp_image, "");
+  mailToButton = (GtkWidget*) gtk_tool_button_new (NULL, "");
   gtk_widget_show (mailToButton);
   gtk_container_add (GTK_CONTAINER (toolbar1), mailToButton);
 
@@ -203,42 +200,45 @@ create_mainWindow (void)
   gtk_widget_show (toolbutton6);
   gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton6);
 
-  toolbutton7 = (GtkWidget*) gtk_tool_button_new (NULL, "");
-  gtk_widget_show (toolbutton7);
-  gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton7);
+  separatortoolitem1 = (GtkWidget*) gtk_separator_tool_item_new ();
+  gtk_widget_show (separatortoolitem1);
+  gtk_container_add (GTK_CONTAINER (toolbar1), separatortoolitem1);
 
   toolitem1 = (GtkWidget*) gtk_tool_item_new ();
   gtk_widget_show (toolitem1);
   gtk_container_add (GTK_CONTAINER (toolbar1), toolitem1);
 
-  comboboxentry1 = gtk_combo_box_entry_new_text ();
-  gtk_widget_show (comboboxentry1);
-  gtk_container_add (GTK_CONTAINER (toolitem1), comboboxentry1);
+  entry1 = gtk_entry_new ();
+  gtk_widget_show (entry1);
+  gtk_container_add (GTK_CONTAINER (toolitem1), entry1);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry1), 9679);
 
   scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow1);
   gtk_box_pack_start (GTK_BOX (vbox2), scrolledwindow1, TRUE, TRUE, 0);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
 
-  mainTreeview = gtk_tree_view_new ();
-  gtk_widget_show (mainTreeview);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow1), mainTreeview);
+  mainTreeView = gtk_tree_view_new ();
+  gtk_widget_show (mainTreeView);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow1), mainTreeView);
+  gtk_tree_view_set_reorderable (GTK_TREE_VIEW (mainTreeView), TRUE);
+  gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW (mainTreeView), TRUE);
 
   g_signal_connect ((gpointer) mainWindow, "destroy",
                     G_CALLBACK (gtk_main_quit),
                     NULL);
-  g_signal_connect ((gpointer) patientListButton, "activate",
-                    G_CALLBACK (on_patientListButton_activate),
-                    NULL);
-  g_signal_connect ((gpointer) doctorListButton, "activate",
-                    G_CALLBACK (on_doctorListButton_activate),
-                    NULL);
-  g_signal_connect ((gpointer) priceListButton, "activate",
-                    G_CALLBACK (on_priceListButton_activate),
-                    NULL);
-  g_signal_connect ((gpointer) configButton, "activate",
-                    G_CALLBACK (on_configButton_activate),
-                    NULL);
+  g_signal_connect_swapped ((gpointer) patientListButton, "clicked",
+                            G_CALLBACK (on_patientListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) doctorListButton, "clicked",
+                            G_CALLBACK (on_doctorListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) priceListButton, "clicked",
+                            G_CALLBACK (on_priceListButton_clicked),
+                            GTK_OBJECT (mainWindow));
+  g_signal_connect_swapped ((gpointer) configButton, "clicked",
+                            G_CALLBACK (on_configButton_clicked),
+                            GTK_OBJECT (mainWindow));
 
   atko = gtk_widget_get_accessible (mainWindow);
   atk_object_set_name (atko, _("ProZubi"));
@@ -278,11 +278,11 @@ create_mainWindow (void)
   GLADE_HOOKUP_OBJECT (mainWindow, toolbutton4, "toolbutton4");
   GLADE_HOOKUP_OBJECT (mainWindow, toolbutton5, "toolbutton5");
   GLADE_HOOKUP_OBJECT (mainWindow, toolbutton6, "toolbutton6");
-  GLADE_HOOKUP_OBJECT (mainWindow, toolbutton7, "toolbutton7");
+  GLADE_HOOKUP_OBJECT (mainWindow, separatortoolitem1, "separatortoolitem1");
   GLADE_HOOKUP_OBJECT (mainWindow, toolitem1, "toolitem1");
-  GLADE_HOOKUP_OBJECT (mainWindow, comboboxentry1, "comboboxentry1");
+  GLADE_HOOKUP_OBJECT (mainWindow, entry1, "entry1");
   GLADE_HOOKUP_OBJECT (mainWindow, scrolledwindow1, "scrolledwindow1");
-  GLADE_HOOKUP_OBJECT (mainWindow, mainTreeview, "mainTreeview");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainTreeView, "mainTreeView");
 
   return mainWindow;
 }
