@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 01.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,6 +13,7 @@
 #include "support.h"
 
 #include "prozubilib/prozubilib.h"
+#include "configFile.h"
 
 enum {
   DOCTOR_LIST_COLUMN_FIO,
@@ -26,7 +27,7 @@ static
 GtkListStore *doctor_list_table_model_new(){
 	GtkListStore *store = gtk_list_store_new(DOCTOR_LIST_N_COLUMNS, 
 			G_TYPE_STRING, // fio
-			G_TYPE_UINT64, // tel
+			G_TYPE_STRING, // tel
 			G_TYPE_STRING, // email
 			G_TYPE_POINTER
 	);
@@ -41,7 +42,7 @@ void doctor_list_store_add(GtkListStore *store, struct doctor_t * doctor){
 	gtk_list_store_set(store, &iter, 
 			DOCTOR_LIST_COLUMN_FIO,   doctor->fio,
 			DOCTOR_LIST_COLUMN_TEL,   doctor->tel,
-			DOCTOR_LIST_COLUMN_EMAIL, doctor->eventcalendar,
+			DOCTOR_LIST_COLUMN_EMAIL, doctor->email,
 			DOCTOR_LIST_POINTER,      doctor,
 	-1);
 }
@@ -246,6 +247,16 @@ void doctor_list_ask_to_remove(GObject *delegate, struct doctor_t * doctor) {
 	gtk_widget_show_all(dialog);
 }
 
+static void
+doctor_list_resize_column    (GtkTreeViewColumn       *column,
+                            gpointer                 w,
+                            gpointer                 user_data)
+{
+	gint width = gtk_tree_view_column_get_width(column);
+	gint col = GPOINTER_TO_INT(user_data);
+	save_colummn_state(width, col, "doctorList");
+}
+
 static
 GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
@@ -281,11 +292,17 @@ GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* fill tableView */
 	int i;
 	for (i = 0; i < DOCTOR_LIST_N_COLUMNS -1; ++i) {
+
+		/* get width */
+		gint width = get_colummn_state(i, "doctorList"); 
+		if (width < 40)
+			width = 40;		
 		
 		GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
-		g_object_set(renderer, "editable", TRUE, NULL);
+		g_object_set(renderer, "editable", FALSE, NULL);
 		g_object_set(renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
-		g_object_set(renderer, "wrap-width", 60, NULL);	
+		g_object_set(renderer, "wrap-width", width, NULL);	
+		g_object_set(renderer, "width", width, NULL);	
 		
 		g_signal_connect(renderer, "edited", 
 				(GCallback) doctor_list_table_cell_edited_callback, treeView);
@@ -295,6 +312,10 @@ GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		
 		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
 				column_titles[i], renderer, "text", i,  NULL);
+		
+		g_signal_connect ((gpointer) column, "notify::width",
+                    G_CALLBACK (doctor_list_resize_column),
+                    GINT_TO_POINTER(i));		
 
 		switch (i) {
 			default: break;

@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 02.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -22,6 +22,7 @@
 #include "prozubilib/prozubilib.h"
 
 #include "patientList.h"
+#include "configFile.h"
 
 int
 main (int argc, char *argv[])
@@ -45,11 +46,17 @@ main (int argc, char *argv[])
    * the project. Delete any components that you don't want shown initially.
    */
   mainWindow = create_mainWindow ();
+  widget_restore_state_from_config(mainWindow, "mainWindow", 640, 480); 
+  GtkWidget *mainWindowLeftBox = lookup_widget(mainWindow, "mainWindowLeftBox");
+  if (mainWindowLeftBox)
+	widget_restore_state_from_config(mainWindowLeftBox, "mainWindowLeftBox", 300, 480); 
 
   /* init database */
   prozubi_t *p = prozubi_init(
 		  "/Users/kuzmich/Library/Containers/kuzm.ig.ProZubi/Data/Documents/ProZubi.sqlite",
 		  NULL);
+
+  g_object_set_data(G_OBJECT(mainWindow), "prozubi", p);
 
   /* patient list as default at start */
   patient_list_new(mainWindow, p);

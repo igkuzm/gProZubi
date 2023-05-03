@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.04.2023
+ * Last Modified Date: 03.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,7 +10,13 @@
 #define PATIENT_LIST_H
 
 #include <gtk/gtk.h>
+#include <stdio.h>
+#include <string.h>
 #include "support.h"
+
+#include "casesList.h"
+#include "interface.h"
+#include "configFile.h"
 
 #include "prozubilib/prozubilib.h"
 
@@ -26,8 +32,8 @@ enum {
   PATIENT_LIST_N_COLUMNS
 };
 
-static
-GtkListStore *patient_list_table_model_new(){
+static GtkListStore 
+*patient_list_table_model_new(){
 	GtkListStore *store = gtk_list_store_new(PATIENT_LIST_N_COLUMNS, 
 			G_TYPE_STRING, // familiya
 			G_TYPE_STRING, // imia
@@ -42,24 +48,32 @@ GtkListStore *patient_list_table_model_new(){
 	return store;
 }
 
-static
-void patient_list_store_add(GtkListStore *store, struct passport_t * patient){
+static void 
+patient_list_store_add(GtkListStore *store, struct passport_t * patient){
+	
+	GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
+	gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
+
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 
 			PATIENT_LIST_COLUMN_FAMILIYA,    patient->familiya,
 			PATIENT_LIST_COLUMN_IMIA,        patient->imia,
 			PATIENT_LIST_COLUMN_OTCHESTVO,   patient->otchestvo,
-			PATIENT_LIST_COLUMN_DATEOFBIRTH, STR("%ld", patient->dateofbirth),
+			PATIENT_LIST_COLUMN_DATEOFBIRTH, date_str,
 			PATIENT_LIST_COLUMN_TEL,         patient->tel,
 			PATIENT_LIST_COLUMN_EMAIL,       patient->email,
 			PATIENT_LIST_COLUMN_COMMENT,     patient->comment,
 			PATIENT_LIST_POINTER,            patient,
 	-1);
+
+	g_date_time_unref(d);
+	if (date_str)
+		free(date_str);
 }
 
-static
-int patient_list_fill_table(void *userdata, struct passport_t * patient){
+static int 
+patient_list_fill_table(void *userdata, struct passport_t * patient){
 
 	GObject *delegate = userdata;
 	GtkListStore *store = g_object_get_data(delegate, "patientListStore");	
@@ -69,8 +83,8 @@ int patient_list_fill_table(void *userdata, struct passport_t * patient){
 	return 0;
 }
 
-static
-gboolean patient_list_table_model_free(GtkTreeModel* model, GtkTreePath* path, 
+static gboolean 
+patient_list_table_model_free(GtkTreeModel* model, GtkTreePath* path, 
 		GtkTreeIter* iter, gpointer data) 
 {
 	struct patient * patient;
@@ -79,8 +93,8 @@ gboolean patient_list_table_model_free(GtkTreeModel* model, GtkTreePath* path,
 	return FALSE;
 }
 
-static
-void patient_list_update(GObject * delegate, prozubi_t *p){
+static void 
+patient_list_update(GObject * delegate, prozubi_t *p){
 	g_print("Update patientList\n");
 	GtkListStore *store = g_object_get_data(delegate, "patientListStore");	
 
@@ -99,8 +113,8 @@ void patient_list_update(GObject * delegate, prozubi_t *p){
 	prozubi_passport_foreach(p, delegate, patient_list_fill_table);
 }
 
-static
-void patient_list_row_activated(
+static void 
+patient_list_row_activated(
 		GtkTreeView *treeview, 
 		GtkTreePath *path, 
 		GtkTreeViewColumn *col, 
@@ -108,6 +122,7 @@ void patient_list_row_activated(
 		)
 {
 	g_print("Row activated\n");
+	g_print("Path: %s\n", gtk_tree_path_to_string(path));
 
 	GObject *delegate = userdata;
 
@@ -123,21 +138,39 @@ void patient_list_row_activated(
 	model = gtk_tree_view_get_model(treeview);
 
 	if (gtk_tree_model_get_iter(model, &iter, path)) {
-		struct patient * patient;
+		struct passport_t * patient;
 		gtk_tree_model_get(model, &iter, PATIENT_LIST_POINTER, &patient, -1); 			
 		
 		if (patient){
 			/* set remove button sensitive */
-			//gtk_widget_set_sensitive(GTK_WIDGET(g_object_get_data(app, "petientRemoveButton")), TRUE);		
+			//gtk_widget_set_sensitive(GTK_WIDGET(g_object_get_data(app, "petientRemoveButton")), TRUE);			
+			g_print("PATIENTID: %s\n", patient->id);
 				
 			/* set selected patient */
 			g_object_set_data(delegate, "selectedPatient", patient);
+
+			/* get window */
+			GtkWidget *casesWindow = create_casesWindow();
+			char title[BUFSIZ];
+			sprintf(title, "%s %s %s", patient->familiya, patient->imia, patient->otchestvo);
+			gtk_window_set_title(GTK_WINDOW(casesWindow), title);
+			widget_restore_state_from_config(casesWindow, "casesWindow", 640, 480); 
+			GtkWidget *casesWindowLeftBox = lookup_widget(casesWindow, "casesWindowLeftBox");
+			if (casesWindowLeftBox)
+				widget_restore_state_from_config(casesWindowLeftBox, "casesWindowLeftBox", 300, 480); 
+			
+
+			gtk_widget_show(casesWindow);
+
+			/* start cases list */
+			prozubi_t *p = g_object_get_data(delegate, "prozubi");
+			cases_list_new(casesWindow, p, patient->id);
 		}
 	}
 }
 
-static
-void patient_list_table_cell_edited_callback (
+static void 
+patient_list_table_cell_edited_callback (
 		GtkCellRendererText *cell, 
 		gchar *path_string, 
 		gchar *new_text, 
@@ -183,45 +216,26 @@ void patient_list_table_cell_edited_callback (
 		gtk_tree_model_sort_convert_iter_to_child_iter(sortedModel, &iter_rawModel, &iter_sortedModel);
     }
 
-	struct patient * patient;
-	gtk_tree_model_get(treeModel, &iter_rawModel, PATIENT_LIST_POINTER, &patient, -1); 			
+	struct passport_t * c;
+	gtk_tree_model_get(treeModel, &iter_rawModel, PATIENT_LIST_POINTER, &c, -1); 			
+	prozubi_t *p = g_object_get_data(G_OBJECT(cell), "prozubi");
+
+	if (!c || !p)
+		return;
 	
 	switch (column_number) {
-		case PATIENT_LIST_COLUMN_FAMILIYA:
-			{
-			//gtk_list_store_set(GTK_LIST_STORE(model), &iter_rawModel, column_number, new_text, -1);				
-				break;
-			}
-		case PATIENT_LIST_COLUMN_IMIA:
-			{
-				break;
-			}			
-		case PATIENT_LIST_COLUMN_OTCHESTVO:
-			{
-				break;
-			}			
-		case PATIENT_LIST_COLUMN_DATEOFBIRTH:
-			{
-				break;
-			}			
-		case PATIENT_LIST_COLUMN_TEL:
-			{
-				break;
-			}			
-		case PATIENT_LIST_COLUMN_EMAIL:
-			{
-				break;
-			}			
 		case PATIENT_LIST_COLUMN_COMMENT:
 			{
+				if (!prozubi_passport_set_PASSPORTCOMMENT(p, c, new_text, true))
+					gtk_list_store_set(GTK_LIST_STORE(model), &iter_rawModel, column_number, new_text, -1);				
 				break;
 			}			
 		default: break;
 	}
 }
 
-static
-void patient_list_ask_to_remove_responce(
+static void 
+patient_list_ask_to_remove_responce(
 		GtkDialog *dialog, 
 		gint responce, 
 		gpointer userdata
@@ -249,8 +263,8 @@ void patient_list_ask_to_remove_responce(
 	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
-static
-void patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) {
+static void 
+patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) {
 	if (!patient){
 		g_print("Patient is NULL\n");
 		return;
@@ -287,11 +301,120 @@ void patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) 
 	gtk_widget_show_all(dialog);
 }
 
-static
-GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
+static void
+patient_list_remove_clicked(gpointer user_data){
+	
+	/* get mainWindow */
+	GtkWidget * mainWindow = 
+			lookup_widget(GTK_WIDGET(user_data), "mainWindow");
+	if (!mainWindow){
+		g_print("Error! Can't find mainWindow\n");
+		return;
+	}	
+	GObject *delegate = G_OBJECT(mainWindow);	
+	
+	/* get treeView */
+	GtkWidget * treeView = 
+			lookup_widget(GTK_WIDGET(delegate), "mainTreeView");
+	if (!treeView){
+		g_print("Error! Can't find mainTreeView\n");
+		return;
+	}
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
+	if (!selection){
+		g_print("Error! Can't get selection\n");
+		return;
+	}
+	
+	GtkTreeModel *model = g_object_get_data(delegate, "patientListStore"); 
+	if (!model){
+		g_print("Error! Can't get model\n");
+		return;
+	}	
+
+	GList *rows = 
+			gtk_tree_selection_get_selected_rows(selection, &model);
+	if (!rows){
+		g_print("Error! Can't get rows\n");
+		return;
+	}	
+
+	GtkTreePath *path = rows->data;
+	if (!path){
+		g_print("Error! Can't get path\n");
+		return;
+	}	
+
+	GtkTreeIter iter;
+	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		struct passport_t *c;
+		gtk_tree_model_get(model, &iter, PATIENT_LIST_POINTER, &c, -1); 			
+		
+		if (c){
+			patient_list_ask_to_remove(delegate, c);
+		}
+	}
+}
+
+static void
+patient_list_resize_column    (GtkTreeViewColumn       *column,
+                            gpointer                 w,
+                            gpointer                 user_data)
+{
+	gint width = gtk_tree_view_column_get_width(column);
+	gint col = GPOINTER_TO_INT(user_data);
+	save_colummn_state(width - 4, col, "patientList");
+}
+
+static gboolean
+patient_list_SearchEqualFunc(
+		GtkTreeModel* model,
+		int column,
+		const char* key,
+		GtkTreeIter* iter,
+		gpointer search_data
+		)
+{
+	struct passport_t * patient;
+	gtk_tree_model_get(model, iter, PATIENT_LIST_POINTER, &patient, -1); 			
+	if (!patient)
+		return 1;
+	
+	char *needle = g_utf8_strup(key, BUFSIZ); 
+
+#define PASSPORT_COLUMN_TEXT(member, number, title)\
+	{\
+		char *haystack = g_utf8_strup(patient->member, BUFSIZ);\
+		if (g_strrstr(haystack, needle) != NULL){\
+			free(needle);\
+			free(haystack);\
+			return 0;\
+		}\
+	}	
+#define PASSPORT_COLUMN_DATE(member, number, title)\
+	{\
+		GDateTime *d = g_date_time_new_from_unix_local(patient->member);\
+		gchar *haystack = g_date_time_format(d,  "%d.%m.%Y");\
+		if (g_strrstr(haystack, needle) != NULL){\
+			free(needle);\
+			free(haystack);\
+			return 0;\
+		}\
+	}
+	PASSPORT_COLUMNS
+#undef PASSPORT_COLUMN_DATE
+#undef PASSPORT_COLUMN_TEXT
+
+	free(needle);
+	return 1;
+}
+
+
+static GtkWidget *
+patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
-	g_object_set_data(delegate, "prozubi", p);
 
 	/* get treeView */
 	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
@@ -309,6 +432,11 @@ GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set tree model for view */
 	//GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeView), GTK_TREE_MODEL(store));
+	
+	GtkWidget *search = lookup_widget(mainWindow, "searchEntry");
+	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(treeView), GTK_ENTRY(search));
+	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeView), true);	
+	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(treeView), patient_list_SearchEqualFunc, NULL, NULL);
 
 	//gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(view), TRUE);
 	g_signal_connect(treeView, "row-activated", 
@@ -327,15 +455,23 @@ GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* fill tableView */
 	int i;
 	for (i = 0; i < PATIENT_LIST_N_COLUMNS -1; ++i) {
-		
+
+		/* get width */
+		gint width = get_colummn_state(i, "patientList"); 
+		if (width < 40)
+			width = 40;
+
 		GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
-		g_object_set(renderer, "editable", TRUE, NULL);
+		g_object_set(renderer, "editable", FALSE, NULL);
 		g_object_set(renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
-		g_object_set(renderer, "wrap-width", 60, NULL);	
+		g_object_set(renderer, "wrap-width", width, NULL);	
+		g_object_set(renderer, "width", width, NULL);	
+		
+		g_object_set_data(G_OBJECT(renderer), "prozubi", p);
 		
 		g_signal_connect(renderer, "edited", 
 				(GCallback) patient_list_table_cell_edited_callback, treeView);
-		
+
 		g_object_set_data(G_OBJECT(renderer), "column_number", GUINT_TO_POINTER(i));
 		g_object_set_data(G_OBJECT(renderer), "delegate", delegate);
 		
@@ -347,7 +483,8 @@ GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 				{
 					gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
 					g_object_set(column, "expand", TRUE, NULL);	
-					g_object_set(renderer, "wrap-width", 300, NULL);	
+					/*g_object_set(renderer, "wrap-width", 300, NULL);	*/
+					g_object_set(renderer, "editable", TRUE, NULL);
 					break;
 				}			
 			default: break;
@@ -355,6 +492,10 @@ GtkWidget *patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		g_object_set(column, "resizable", TRUE, NULL);	
 		
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
+		
+		g_signal_connect ((gpointer) column, "notify::width",
+                    G_CALLBACK (patient_list_resize_column),
+                    GINT_TO_POINTER(i));		
 	}
 
 	gtk_widget_show(treeView);

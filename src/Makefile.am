@@ -16,7 +16,9 @@ gprozubi_SOURCES = \
 	prozubilib/kdata2/kdata2.c \
 	prozubilib/kdata2/cYandexDisk/cYandexDisk.c\
 	prozubilib/kdata2/cYandexDisk/cJSON.c\
-	prozubilib/kdata2/cYandexDisk/uuid4.c
+	prozubilib/kdata2/cYandexDisk/uuid4.c\
+	prozubilib/date-time/strftime.c\
+	prozubilib/date-time/strptime.c
 
 gprozubi_LDADD = @PACKAGE_LIBS@ $(INTLLIBS) -lsqlite3 -lcurl
 

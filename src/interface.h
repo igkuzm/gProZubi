@@ -3,3 +3,5 @@
  */
 
 GtkWidget* create_mainWindow (void);
+GtkWidget* create_casesWindow (void);
+GtkWidget* create_patientEditWindow (void);
