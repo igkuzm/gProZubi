@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -254,7 +254,7 @@ doctor_list_resize_column    (GtkTreeViewColumn       *column,
 {
 	gint width = gtk_tree_view_column_get_width(column);
 	gint col = GPOINTER_TO_INT(user_data);
-	save_colummn_state(width, col, "doctorList");
+	save_colummn_state(width - 4, col, "doctorList");
 }
 
 static

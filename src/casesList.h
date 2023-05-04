@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -73,9 +73,6 @@ cases_list_fill_table(
 			CASES_LIST_COLUMN_COMBOBOX_ARRAY, array,
 			CASES_LIST_POINTER,               c,
 	-1);
-
-	if (title)
-		free(title);
 
 	return gtk_tree_iter_copy(&iter);
 }

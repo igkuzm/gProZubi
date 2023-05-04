@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include <stdio.h>
@@ -246,7 +246,7 @@ on_addButton_clicked                   (GtkToolButton   *toolbutton,
 			);
 
 	if (c)
-		patient_edit_new(p, c);
+		patient_edit_new(mainWindow, p, c, TRUE);
 }
 
 
@@ -303,7 +303,7 @@ on_editButton_clicked                  (GtkToolButton   *toolbutton,
 		gtk_tree_model_get(model, &iter, PATIENT_LIST_POINTER, &c, -1); 			
 		
 		if (c)
-			patient_edit_new(p, c);
+			patient_edit_new(mainWindow, p, c, FALSE);
 	}	
 }
 
@@ -409,7 +409,7 @@ on_dateOfBirthEntry_insert_text        (GtkEditable     *editable,
 			text[i++] = '.';		
 		}
 	} else if (*p == 3){
-		if (c == '1'){
+		if (c < '2'){
 			text[i++] = c;		
 		} else {
 			text[i++] = '0';		
@@ -445,5 +445,156 @@ on_dateOfBirthEntry_insert_text        (GtkEditable     *editable,
 	
 	/* stop callback */
 	g_signal_stop_emission_by_name (editable, "insert_text");
+}
+
+void
+on_mainWindowMenuCreate_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+	on_addButton_clicked(GTK_TOOL_BUTTON(menuitem), user_data);
+}
+
+
+void
+on_mainWindowMenuOpen_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuSave_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuSaveAs_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuExit_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+	gtk_main_quit();	
+}
+
+
+void
+on_mainWindowMenuCut_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuCopy_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuPaste_activate        (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mainWindowMenuDelete_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+	patient_list_remove_clicked(menuitem);
+}
+
+
+void
+on_mainWindowMenuAbout_activate        (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowMenuCut_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowMenuPaste_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowMenuDelete_activate      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowShare_activate           (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowLoad_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowDocs_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowAdd_activate             (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowDelete_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_casesWindowPrint_activate           (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
 }
 

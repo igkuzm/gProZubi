@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -87,9 +87,9 @@ static gboolean
 patient_list_table_model_free(GtkTreeModel* model, GtkTreePath* path, 
 		GtkTreeIter* iter, gpointer data) 
 {
-	struct patient * patient;
+	struct passport_t * patient;
 	gtk_tree_model_get(model, iter, PATIENT_LIST_POINTER, &patient, -1);	
-	free(patient);
+	prozubi_passport_free(patient);
 	return FALSE;
 }
 
@@ -245,7 +245,8 @@ patient_list_ask_to_remove_responce(
 		g_print("Remove commited\n");
 
 		GObject *delegate = userdata;
-		struct patient * patient =  g_object_get_data(delegate, "patientToRemove"); 
+		struct passport_t * patient =  g_object_get_data(delegate, "patientToRemove"); 
+		prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 		
 		if (!patient){
 			g_print("Patient is NULL\n");
@@ -255,9 +256,8 @@ patient_list_ask_to_remove_responce(
 		}		
 
 		/* remove patient and update table */
-		/*! TODO: remove parient
-		*  \todo remove parient
-		*/
+		prozubi_passport_remove(p, patient);
+		patient_list_update(delegate, p);
 	}
 	/*gtk_window_destroy(GTK_WINDOW(dialog));*/
 	gtk_widget_destroy(GTK_WIDGET(dialog));

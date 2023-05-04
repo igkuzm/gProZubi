@@ -2,7 +2,7 @@
  * File              : patientEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.05.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,11 +12,13 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include "glibconfig.h"
 #include "support.h"
 
 #include "casesList.h"
 #include "interface.h"
 #include "configFile.h"
+#include "patientList.h"
 
 #include "prozubilib/prozubilib.h"
 
@@ -37,6 +39,8 @@ patient_edit_save_button_pushed(gpointer data){
 
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 	struct passport_t *patient = g_object_get_data(delegate, "patient");
+	GtkWidget *mainWindow = g_object_get_data(delegate, "mainWindow");
+	gboolean isNew = GPOINTER_TO_INT(g_object_get_data(delegate, "isNew"));
 	
 	GtkWidget *patientEditWindow = GTK_WIDGET(delegate);
 
@@ -92,12 +96,20 @@ PATIENT_EDIT_TYPES
 #undef PATIENT_EDIT_TYPE_ENTRY 
 #undef PATIENT_EDIT_TYPE_EDATE 
 #undef PATIENT_EDIT_TYPE_TEXTV 
-	
+	if (isNew)
+		prozubi_passport_free(patient);
+	patient_list_update(G_OBJECT(mainWindow), p);
 	gtk_widget_destroy(patientEditWindow);
 }
 
 static GtkWidget *
-patient_edit_new(prozubi_t *p, struct passport_t *patient){
+patient_edit_new(
+		GtkWidget *mainWindow, 
+		prozubi_t *p, 
+		struct passport_t *patient,
+		gboolean isNew
+		)
+{
 	if (!patient){
 		g_print("patient is NULL\n");
 		return NULL;
@@ -117,6 +129,8 @@ patient_edit_new(prozubi_t *p, struct passport_t *patient){
 	GObject *delegate = G_OBJECT(patientEditWindow);
 	g_object_set_data(delegate, "patient", patient);
 	g_object_set_data(delegate, "prozubi", p);
+	g_object_set_data(delegate, "mainWindow", mainWindow);
+	g_object_set_data(delegate, "isNew", GINT_TO_POINTER(isNew));
 
 
 #define PATIENT_EDIT_TYPE_ENTRY(member, name, key)\

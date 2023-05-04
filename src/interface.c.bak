@@ -34,16 +34,29 @@ create_mainWindow (void)
   GtkWidget *mainWindowPaned;
   GtkWidget *mainWindowLeftBox;
   GtkWidget *patientListButton;
-  GtkWidget *alignment1;
-  GtkWidget *hbox1;
-  GtkWidget *image1;
-  GtkWidget *label1;
   GtkWidget *doctorListButton;
-  GtkWidget *alignment2;
-  GtkWidget *hbox2;
-  GtkWidget *image2;
-  GtkWidget *label2;
+  GtkWidget *priceListButton;
+  GtkWidget *configButton;
   GtkWidget *mainWindowRightBox;
+  GtkWidget *mainWindowMenu;
+  GtkWidget *menuitem1;
+  GtkWidget *menuitem1_menu;
+  GtkWidget *mainWindowMenuCreate;
+  GtkWidget *mainWindowMenuOpen;
+  GtkWidget *mainWindowMenuSave;
+  GtkWidget *mainWindowMenuSaveAs;
+  GtkWidget *separatormenuitem1;
+  GtkWidget *mainWindowMenuExit;
+  GtkWidget *menuitem2;
+  GtkWidget *menuitem2_menu;
+  GtkWidget *mainWindowMenuCut;
+  GtkWidget *mainWindowMenuCopy;
+  GtkWidget *mainWindowMenuPaste;
+  GtkWidget *mainWindowMenuDelete;
+  GtkWidget *menuitem3;
+  GtkWidget *menuitem4;
+  GtkWidget *menuitem4_menu;
+  GtkWidget *mainWindowMenuAbout;
   GtkWidget *toolbar1;
   GtkIconSize tmp_toolbar_icon_size;
   GtkWidget *mailToButton;
@@ -57,6 +70,9 @@ create_mainWindow (void)
   GtkWidget *searchEntry;
   GtkWidget *scrolledwindow1;
   GtkWidget *mainTreeView;
+  GtkAccelGroup *accel_group;
+
+  accel_group = gtk_accel_group_new ();
 
   mainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (mainWindow, 640, 480);
@@ -70,49 +86,103 @@ create_mainWindow (void)
   gtk_widget_show (mainWindowLeftBox);
   gtk_paned_pack1 (GTK_PANED (mainWindowPaned), mainWindowLeftBox, FALSE, TRUE);
 
-  patientListButton = gtk_button_new ();
+  patientListButton = gtk_button_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \320\277\320\260\321\206\320\270\320\265\320\275\321\202\320\276\320\262"));
   gtk_widget_show (patientListButton);
   gtk_box_pack_start (GTK_BOX (mainWindowLeftBox), patientListButton, FALSE, FALSE, 0);
+  gtk_button_set_relief (GTK_BUTTON (patientListButton), GTK_RELIEF_NONE);
 
-  alignment1 = gtk_alignment_new (0.5, 0.5, 0, 0);
-  gtk_widget_show (alignment1);
-  gtk_container_add (GTK_CONTAINER (patientListButton), alignment1);
-
-  hbox1 = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (hbox1);
-  gtk_container_add (GTK_CONTAINER (alignment1), hbox1);
-
-  image1 = create_pixmap (mainWindow, "person.circle.png");
-  gtk_widget_show (image1);
-  gtk_box_pack_start (GTK_BOX (hbox1), image1, FALSE, FALSE, 0);
-
-  label1 = gtk_label_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \320\277\320\260\321\206\320\270\320\265\320\275\321\202\320\276\320\262"));
-  gtk_widget_show (label1);
-  gtk_box_pack_start (GTK_BOX (hbox1), label1, FALSE, FALSE, 0);
-
-  doctorListButton = gtk_button_new ();
+  doctorListButton = gtk_button_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \321\201\320\276\321\202\321\200\321\203\320\264\320\275\320\270\320\272\320\276\320\262"));
   gtk_widget_show (doctorListButton);
   gtk_box_pack_start (GTK_BOX (mainWindowLeftBox), doctorListButton, FALSE, FALSE, 0);
+  gtk_button_set_relief (GTK_BUTTON (doctorListButton), GTK_RELIEF_NONE);
 
-  alignment2 = gtk_alignment_new (0.5, 0.5, 0, 0);
-  gtk_widget_show (alignment2);
-  gtk_container_add (GTK_CONTAINER (doctorListButton), alignment2);
+  priceListButton = gtk_button_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \321\203\321\201\320\273\321\203\320\263 (\320\277\321\200\320\260\320\271\321\201)"));
+  gtk_widget_show (priceListButton);
+  gtk_box_pack_start (GTK_BOX (mainWindowLeftBox), priceListButton, FALSE, FALSE, 0);
+  gtk_button_set_relief (GTK_BUTTON (priceListButton), GTK_RELIEF_NONE);
 
-  hbox2 = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (hbox2);
-  gtk_container_add (GTK_CONTAINER (alignment2), hbox2);
-
-  image2 = gtk_image_new_from_stock ("gtk-orientation-landscape", GTK_ICON_SIZE_BUTTON);
-  gtk_widget_show (image2);
-  gtk_box_pack_start (GTK_BOX (hbox2), image2, FALSE, FALSE, 0);
-
-  label2 = gtk_label_new_with_mnemonic (_("\320\241\320\277\320\270\321\201\320\276\320\272 \321\201\320\276\321\202\321\200\321\203\320\264\320\275\320\270\320\272\320\276\320\262"));
-  gtk_widget_show (label2);
-  gtk_box_pack_start (GTK_BOX (hbox2), label2, FALSE, FALSE, 0);
+  configButton = gtk_button_new_with_mnemonic (_("\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270"));
+  gtk_widget_show (configButton);
+  gtk_box_pack_start (GTK_BOX (mainWindowLeftBox), configButton, FALSE, FALSE, 20);
+  gtk_button_set_relief (GTK_BUTTON (configButton), GTK_RELIEF_NONE);
 
   mainWindowRightBox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (mainWindowRightBox);
   gtk_paned_pack2 (GTK_PANED (mainWindowPaned), mainWindowRightBox, TRUE, TRUE);
+
+  mainWindowMenu = gtk_menu_bar_new ();
+  gtk_widget_show (mainWindowMenu);
+  gtk_box_pack_start (GTK_BOX (mainWindowRightBox), mainWindowMenu, FALSE, FALSE, 0);
+
+  menuitem1 = gtk_menu_item_new_with_mnemonic (_("\320\244\320\260\320\271\320\273"));
+  gtk_widget_show (menuitem1);
+  gtk_container_add (GTK_CONTAINER (mainWindowMenu), menuitem1);
+
+  menuitem1_menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem1), menuitem1_menu);
+
+  mainWindowMenuCreate = gtk_image_menu_item_new_from_stock ("gtk-new", accel_group);
+  gtk_widget_show (mainWindowMenuCreate);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), mainWindowMenuCreate);
+
+  mainWindowMenuOpen = gtk_image_menu_item_new_from_stock ("gtk-open", accel_group);
+  gtk_widget_show (mainWindowMenuOpen);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), mainWindowMenuOpen);
+
+  mainWindowMenuSave = gtk_image_menu_item_new_from_stock ("gtk-save", accel_group);
+  gtk_widget_show (mainWindowMenuSave);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), mainWindowMenuSave);
+
+  mainWindowMenuSaveAs = gtk_image_menu_item_new_from_stock ("gtk-save-as", accel_group);
+  gtk_widget_show (mainWindowMenuSaveAs);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), mainWindowMenuSaveAs);
+
+  separatormenuitem1 = gtk_separator_menu_item_new ();
+  gtk_widget_show (separatormenuitem1);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), separatormenuitem1);
+  gtk_widget_set_sensitive (separatormenuitem1, FALSE);
+
+  mainWindowMenuExit = gtk_image_menu_item_new_from_stock ("gtk-quit", accel_group);
+  gtk_widget_show (mainWindowMenuExit);
+  gtk_container_add (GTK_CONTAINER (menuitem1_menu), mainWindowMenuExit);
+
+  menuitem2 = gtk_menu_item_new_with_mnemonic (_("\320\237\321\200\320\260\320\262\320\272\320\260"));
+  gtk_widget_show (menuitem2);
+  gtk_container_add (GTK_CONTAINER (mainWindowMenu), menuitem2);
+
+  menuitem2_menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem2), menuitem2_menu);
+
+  mainWindowMenuCut = gtk_image_menu_item_new_from_stock ("gtk-cut", accel_group);
+  gtk_widget_show (mainWindowMenuCut);
+  gtk_container_add (GTK_CONTAINER (menuitem2_menu), mainWindowMenuCut);
+
+  mainWindowMenuCopy = gtk_image_menu_item_new_from_stock ("gtk-copy", accel_group);
+  gtk_widget_show (mainWindowMenuCopy);
+  gtk_container_add (GTK_CONTAINER (menuitem2_menu), mainWindowMenuCopy);
+
+  mainWindowMenuPaste = gtk_image_menu_item_new_from_stock ("gtk-paste", accel_group);
+  gtk_widget_show (mainWindowMenuPaste);
+  gtk_container_add (GTK_CONTAINER (menuitem2_menu), mainWindowMenuPaste);
+
+  mainWindowMenuDelete = gtk_image_menu_item_new_from_stock ("gtk-delete", accel_group);
+  gtk_widget_show (mainWindowMenuDelete);
+  gtk_container_add (GTK_CONTAINER (menuitem2_menu), mainWindowMenuDelete);
+
+  menuitem3 = gtk_menu_item_new_with_mnemonic (_("\320\222\320\270\320\264"));
+  gtk_widget_show (menuitem3);
+  gtk_container_add (GTK_CONTAINER (mainWindowMenu), menuitem3);
+
+  menuitem4 = gtk_menu_item_new_with_mnemonic (_("\320\241\320\277\321\200\320\260\320\262\320\272\320\260"));
+  gtk_widget_show (menuitem4);
+  gtk_container_add (GTK_CONTAINER (mainWindowMenu), menuitem4);
+
+  menuitem4_menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem4), menuitem4_menu);
+
+  mainWindowMenuAbout = gtk_menu_item_new_with_mnemonic (_("\320\236 \320\277\321\200\320\276\320\263\321\200\320\260\320\274\320\274\320\265..."));
+  gtk_widget_show (mainWindowMenuAbout);
+  gtk_container_add (GTK_CONTAINER (menuitem4_menu), mainWindowMenuAbout);
 
   toolbar1 = gtk_toolbar_new ();
   gtk_widget_show (toolbar1);
@@ -183,6 +253,36 @@ create_mainWindow (void)
   g_signal_connect_swapped ((gpointer) doctorListButton, "clicked",
                             G_CALLBACK (on_doctorListButton_clicked),
                             GTK_OBJECT (mainWindow));
+  g_signal_connect ((gpointer) mainWindowMenuCreate, "activate",
+                    G_CALLBACK (on_mainWindowMenuCreate_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuOpen, "activate",
+                    G_CALLBACK (on_mainWindowMenuOpen_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuSave, "activate",
+                    G_CALLBACK (on_mainWindowMenuSave_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuSaveAs, "activate",
+                    G_CALLBACK (on_mainWindowMenuSaveAs_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuExit, "activate",
+                    G_CALLBACK (on_mainWindowMenuExit_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuCut, "activate",
+                    G_CALLBACK (on_mainWindowMenuCut_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuCopy, "activate",
+                    G_CALLBACK (on_mainWindowMenuCopy_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuPaste, "activate",
+                    G_CALLBACK (on_mainWindowMenuPaste_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuDelete, "activate",
+                    G_CALLBACK (on_mainWindowMenuDelete_activate),
+                    NULL);
+  g_signal_connect ((gpointer) mainWindowMenuAbout, "activate",
+                    G_CALLBACK (on_mainWindowMenuAbout_activate),
+                    NULL);
   g_signal_connect ((gpointer) addButton, "clicked",
                     G_CALLBACK (on_addButton_clicked),
                     NULL);
@@ -203,16 +303,29 @@ create_mainWindow (void)
   GLADE_HOOKUP_OBJECT (mainWindow, mainWindowPaned, "mainWindowPaned");
   GLADE_HOOKUP_OBJECT (mainWindow, mainWindowLeftBox, "mainWindowLeftBox");
   GLADE_HOOKUP_OBJECT (mainWindow, patientListButton, "patientListButton");
-  GLADE_HOOKUP_OBJECT (mainWindow, alignment1, "alignment1");
-  GLADE_HOOKUP_OBJECT (mainWindow, hbox1, "hbox1");
-  GLADE_HOOKUP_OBJECT (mainWindow, image1, "image1");
-  GLADE_HOOKUP_OBJECT (mainWindow, label1, "label1");
   GLADE_HOOKUP_OBJECT (mainWindow, doctorListButton, "doctorListButton");
-  GLADE_HOOKUP_OBJECT (mainWindow, alignment2, "alignment2");
-  GLADE_HOOKUP_OBJECT (mainWindow, hbox2, "hbox2");
-  GLADE_HOOKUP_OBJECT (mainWindow, image2, "image2");
-  GLADE_HOOKUP_OBJECT (mainWindow, label2, "label2");
+  GLADE_HOOKUP_OBJECT (mainWindow, priceListButton, "priceListButton");
+  GLADE_HOOKUP_OBJECT (mainWindow, configButton, "configButton");
   GLADE_HOOKUP_OBJECT (mainWindow, mainWindowRightBox, "mainWindowRightBox");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenu, "mainWindowMenu");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem1, "menuitem1");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem1_menu, "menuitem1_menu");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuCreate, "mainWindowMenuCreate");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuOpen, "mainWindowMenuOpen");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuSave, "mainWindowMenuSave");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuSaveAs, "mainWindowMenuSaveAs");
+  GLADE_HOOKUP_OBJECT (mainWindow, separatormenuitem1, "separatormenuitem1");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuExit, "mainWindowMenuExit");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem2, "menuitem2");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem2_menu, "menuitem2_menu");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuCut, "mainWindowMenuCut");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuCopy, "mainWindowMenuCopy");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuPaste, "mainWindowMenuPaste");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuDelete, "mainWindowMenuDelete");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem3, "menuitem3");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem4, "menuitem4");
+  GLADE_HOOKUP_OBJECT (mainWindow, menuitem4_menu, "menuitem4_menu");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainWindowMenuAbout, "mainWindowMenuAbout");
   GLADE_HOOKUP_OBJECT (mainWindow, toolbar1, "toolbar1");
   GLADE_HOOKUP_OBJECT (mainWindow, mailToButton, "mailToButton");
   GLADE_HOOKUP_OBJECT (mainWindow, telegramToButton, "telegramToButton");
@@ -225,6 +338,8 @@ create_mainWindow (void)
   GLADE_HOOKUP_OBJECT (mainWindow, searchEntry, "searchEntry");
   GLADE_HOOKUP_OBJECT (mainWindow, scrolledwindow1, "scrolledwindow1");
   GLADE_HOOKUP_OBJECT (mainWindow, mainTreeView, "mainTreeView");
+
+  gtk_window_add_accel_group (GTK_WINDOW (mainWindow), accel_group);
 
   return mainWindow;
 }
@@ -242,9 +357,18 @@ create_casesWindow (void)
   GtkWidget *casesListView;
   GtkWidget *casesListInfo;
   GtkWidget *vbox4;
+  GtkWidget *menubar2;
+  GtkWidget *menuitem9;
+  GtkWidget *menuitem9_menu;
+  GtkWidget *casesWindowMenuCut;
+  GtkWidget *casesWindowMenuCopy;
+  GtkWidget *casesWindowMenuPaste;
+  GtkWidget *casesWindowMenuDelete;
   GtkWidget *casesEditToolbar;
   GtkWidget *casesEditWindow;
-  GtkWidget *casesEditInfo;
+  GtkAccelGroup *accel_group;
+
+  accel_group = gtk_accel_group_new ();
 
   casesWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (casesWindow, 640, 480);
@@ -289,6 +413,33 @@ create_casesWindow (void)
   gtk_widget_show (vbox4);
   gtk_paned_pack2 (GTK_PANED (casesPaned), vbox4, TRUE, TRUE);
 
+  menubar2 = gtk_menu_bar_new ();
+  gtk_widget_show (menubar2);
+  gtk_box_pack_start (GTK_BOX (vbox4), menubar2, FALSE, FALSE, 0);
+
+  menuitem9 = gtk_menu_item_new_with_mnemonic (_("\320\237\321\200\320\260\320\262\320\272\320\260"));
+  gtk_widget_show (menuitem9);
+  gtk_container_add (GTK_CONTAINER (menubar2), menuitem9);
+
+  menuitem9_menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem9), menuitem9_menu);
+
+  casesWindowMenuCut = gtk_image_menu_item_new_from_stock ("gtk-cut", accel_group);
+  gtk_widget_show (casesWindowMenuCut);
+  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuCut);
+
+  casesWindowMenuCopy = gtk_image_menu_item_new_from_stock ("gtk-copy", accel_group);
+  gtk_widget_show (casesWindowMenuCopy);
+  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuCopy);
+
+  casesWindowMenuPaste = gtk_image_menu_item_new_from_stock ("gtk-paste", accel_group);
+  gtk_widget_show (casesWindowMenuPaste);
+  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuPaste);
+
+  casesWindowMenuDelete = gtk_image_menu_item_new_from_stock ("gtk-delete", accel_group);
+  gtk_widget_show (casesWindowMenuDelete);
+  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuDelete);
+
   casesEditToolbar = gtk_toolbar_new ();
   gtk_widget_show (casesEditToolbar);
   gtk_box_pack_start (GTK_BOX (vbox4), casesEditToolbar, FALSE, FALSE, 0);
@@ -300,10 +451,6 @@ create_casesWindow (void)
   gtk_box_pack_start (GTK_BOX (vbox4), casesEditWindow, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (casesEditWindow), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 
-  casesEditInfo = gtk_label_new ("");
-  gtk_widget_show (casesEditInfo);
-  gtk_box_pack_start (GTK_BOX (vbox4), casesEditInfo, FALSE, FALSE, 0);
-
   g_signal_connect ((gpointer) casesWindow, "size_allocate",
                     G_CALLBACK (on_casesWindow_size_allocate),
                     NULL);
@@ -312,6 +459,18 @@ create_casesWindow (void)
                     NULL);
   g_signal_connect ((gpointer) caseAddButton, "clicked",
                     G_CALLBACK (on_caseAddButton_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) casesWindowMenuCut, "activate",
+                    G_CALLBACK (on_casesWindowMenuCut_activate),
+                    NULL);
+  g_signal_connect ((gpointer) casesWindowMenuCopy, "activate",
+                    G_CALLBACK (on_casesWindowMenuCut_activate),
+                    NULL);
+  g_signal_connect ((gpointer) casesWindowMenuPaste, "activate",
+                    G_CALLBACK (on_casesWindowMenuPaste_activate),
+                    NULL);
+  g_signal_connect ((gpointer) casesWindowMenuDelete, "activate",
+                    G_CALLBACK (on_casesWindowMenuDelete_activate),
                     NULL);
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
@@ -324,9 +483,17 @@ create_casesWindow (void)
   GLADE_HOOKUP_OBJECT (casesWindow, casesListView, "casesListView");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListInfo, "casesListInfo");
   GLADE_HOOKUP_OBJECT (casesWindow, vbox4, "vbox4");
+  GLADE_HOOKUP_OBJECT (casesWindow, menubar2, "menubar2");
+  GLADE_HOOKUP_OBJECT (casesWindow, menuitem9, "menuitem9");
+  GLADE_HOOKUP_OBJECT (casesWindow, menuitem9_menu, "menuitem9_menu");
+  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuCut, "casesWindowMenuCut");
+  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuCopy, "casesWindowMenuCopy");
+  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuPaste, "casesWindowMenuPaste");
+  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuDelete, "casesWindowMenuDelete");
   GLADE_HOOKUP_OBJECT (casesWindow, casesEditToolbar, "casesEditToolbar");
   GLADE_HOOKUP_OBJECT (casesWindow, casesEditWindow, "casesEditWindow");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesEditInfo, "casesEditInfo");
+
+  gtk_window_add_accel_group (GTK_WINDOW (casesWindow), accel_group);
 
   return casesWindow;
 }
@@ -357,8 +524,8 @@ create_patientEditWindow (void)
   GtkWidget *label11;
   GtkWidget *commentEntry;
   GtkWidget *hbox3;
-  GtkWidget *patientEditCancelButton;
   GtkWidget *patientEditSaveButton;
+  GtkWidget *patientEditCancelButton;
 
   patientEditWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (patientEditWindow, 300, 450);
@@ -479,15 +646,15 @@ create_patientEditWindow (void)
   gtk_widget_show (hbox3);
   gtk_box_pack_start (GTK_BOX (vbox5), hbox3, TRUE, TRUE, 0);
 
-  patientEditCancelButton = gtk_button_new_with_mnemonic (_("\320\236\321\202\320\274\320\265\320\275\320\260"));
-  gtk_widget_show (patientEditCancelButton);
-  gtk_box_pack_start (GTK_BOX (hbox3), patientEditCancelButton, FALSE, FALSE, 0);
-  gtk_button_set_relief (GTK_BUTTON (patientEditCancelButton), GTK_RELIEF_NONE);
-
   patientEditSaveButton = gtk_button_new_with_mnemonic (_("\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214"));
   gtk_widget_show (patientEditSaveButton);
   gtk_box_pack_start (GTK_BOX (hbox3), patientEditSaveButton, FALSE, FALSE, 0);
   gtk_button_set_relief (GTK_BUTTON (patientEditSaveButton), GTK_RELIEF_NONE);
+
+  patientEditCancelButton = gtk_button_new_with_mnemonic (_("\320\236\321\202\320\274\320\265\320\275\320\260"));
+  gtk_widget_show (patientEditCancelButton);
+  gtk_box_pack_start (GTK_BOX (hbox3), patientEditCancelButton, FALSE, FALSE, 0);
+  gtk_button_set_relief (GTK_BUTTON (patientEditCancelButton), GTK_RELIEF_NONE);
 
   g_signal_connect ((gpointer) familiyaEntry, "changed",
                     G_CALLBACK (on_familiyaEntry_changed),
@@ -504,6 +671,9 @@ create_patientEditWindow (void)
   g_signal_connect ((gpointer) dateOfBirthEntry, "changed",
                     G_CALLBACK (on_dateOfBirthEntry_changed),
                     NULL);
+  g_signal_connect ((gpointer) dateOfBirthEntry, "insert_text",
+                    G_CALLBACK (on_dateOfBirthEntry_insert_text),
+                    NULL);
   g_signal_connect ((gpointer) telEntry, "changed",
                     G_CALLBACK (on_telEntry_changed),
                     NULL);
@@ -513,11 +683,11 @@ create_patientEditWindow (void)
   g_signal_connect ((gpointer) commentEntry, "changed",
                     G_CALLBACK (on_commentEntry_changed),
                     NULL);
-  g_signal_connect ((gpointer) patientEditCancelButton, "clicked",
-                    G_CALLBACK (on_patientEditCancelButton_clicked),
-                    NULL);
   g_signal_connect ((gpointer) patientEditSaveButton, "clicked",
                     G_CALLBACK (on_patientEditSaveButton_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) patientEditCancelButton, "clicked",
+                    G_CALLBACK (on_patientEditCancelButton_clicked),
                     NULL);
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
@@ -544,8 +714,8 @@ create_patientEditWindow (void)
   GLADE_HOOKUP_OBJECT (patientEditWindow, label11, "label11");
   GLADE_HOOKUP_OBJECT (patientEditWindow, commentEntry, "commentEntry");
   GLADE_HOOKUP_OBJECT (patientEditWindow, hbox3, "hbox3");
-  GLADE_HOOKUP_OBJECT (patientEditWindow, patientEditCancelButton, "patientEditCancelButton");
   GLADE_HOOKUP_OBJECT (patientEditWindow, patientEditSaveButton, "patientEditSaveButton");
+  GLADE_HOOKUP_OBJECT (patientEditWindow, patientEditCancelButton, "patientEditCancelButton");
 
   return patientEditWindow;
 }

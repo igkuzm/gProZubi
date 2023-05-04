@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 03.05.2023
+ * Last Modified Date: 04.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -328,7 +328,7 @@ cases_edit_date_entry_insert_text        (GtkEditable     *editable,
 			text[i++] = '.';		
 		}
 	} else if (*p == 3){
-		if (c == '1'){
+		if (c < '2'){
 			text[i++] = c;		
 		} else {
 			text[i++] = '0';		

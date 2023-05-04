@@ -160,3 +160,119 @@ on_dateOfBirthEntry_insert_text        (GtkEditable     *editable,
                                         gint             new_text_length,
                                         gpointer         position,
                                         gpointer         user_data);
+
+void
+on_______________1_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on___________________1_activate        (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on__________________________1_activate (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on___________1_activate                (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_________________1_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_____________________1_activate      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on______________________1_activate     (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_________________2_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_____________________2_activate      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_______________2_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuCreate_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuOpen_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuSave_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuSaveAs_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuExit_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuCut_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuCopy_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuPaste_activate        (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuDelete_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_mainWindowMenuAbout_activate        (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowMenuCut_activate         (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowMenuPaste_activate       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowMenuDelete_activate      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowShare_activate           (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowLoad_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowDocs_activate            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowAdd_activate             (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowDelete_activate          (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_casesWindowPrint_activate           (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
