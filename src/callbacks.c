@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 05.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include <stdio.h>
@@ -23,14 +23,6 @@
 #include "patientEdit.h"
 #include "doctorList.h"
 #include "configFile.h"
-
-#include "strfilter.h"
-
-
-const char *numbers[] = 
-{
-	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", NULL
-};
 
 void clear_columns(GtkWidget *mainWindow){
 	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
@@ -595,6 +587,16 @@ void
 on_casesWindowPrint_activate           (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+
+}
+
+
+void
+on_patientEditWindow_size_allocate     (GtkWidget       *widget,
+                                        GdkRectangle    *allocation,
+                                        gpointer         user_data)
+{
+	save_widget_state(widget, allocation, "patientEditWindow");
 
 }
 

@@ -485,7 +485,6 @@
     <widget class="GtkHPaned" id="casesPaned">
       <property name="visible">True</property>
       <property name="can_focus">True</property>
-      <property name="position">0</property>
 
       <child>
 	<widget class="GtkVBox" id="casesWindowLeftBox">
@@ -753,7 +752,7 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_CENTER</property>
   <property name="modal">True</property>
-  <property name="resizable">False</property>
+  <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
   <property name="skip_taskbar_hint">False</property>
@@ -762,6 +761,7 @@
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
+  <signal name="size_allocate" handler="on_patientEditWindow_size_allocate" last_modification_time="Fri, 05 May 2023 02:08:33 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="vbox5">

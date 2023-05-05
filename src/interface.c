@@ -384,7 +384,6 @@ create_casesWindow (void)
   casesPaned = gtk_hpaned_new ();
   gtk_widget_show (casesPaned);
   gtk_container_add (GTK_CONTAINER (casesWindow), casesPaned);
-  gtk_paned_set_position (GTK_PANED (casesPaned), 0);
 
   casesWindowLeftBox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (casesWindowLeftBox);
@@ -578,7 +577,6 @@ create_patientEditWindow (void)
   gtk_window_set_title (GTK_WINDOW (patientEditWindow), _("window1"));
   gtk_window_set_position (GTK_WINDOW (patientEditWindow), GTK_WIN_POS_CENTER);
   gtk_window_set_modal (GTK_WINDOW (patientEditWindow), TRUE);
-  gtk_window_set_resizable (GTK_WINDOW (patientEditWindow), FALSE);
   gtk_window_set_type_hint (GTK_WINDOW (patientEditWindow), GDK_WINDOW_TYPE_HINT_DIALOG);
 
   vbox5 = gtk_vbox_new (FALSE, 0);
@@ -702,6 +700,9 @@ create_patientEditWindow (void)
   gtk_box_pack_start (GTK_BOX (hbox3), patientEditCancelButton, FALSE, FALSE, 0);
   gtk_button_set_relief (GTK_BUTTON (patientEditCancelButton), GTK_RELIEF_NONE);
 
+  g_signal_connect ((gpointer) patientEditWindow, "size_allocate",
+                    G_CALLBACK (on_patientEditWindow_size_allocate),
+                    NULL);
   g_signal_connect ((gpointer) familiyaEntry, "changed",
                     G_CALLBACK (on_familiyaEntry_changed),
                     NULL);

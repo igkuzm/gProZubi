@@ -276,3 +276,8 @@ on_casesWindowDelete_activate          (GtkMenuItem     *menuitem,
 void
 on_casesWindowPrint_activate           (GtkMenuItem     *menuitem,
                                         gpointer         user_data);
+
+void
+on_patientEditWindow_size_allocate     (GtkWidget       *widget,
+                                        GdkRectangle    *allocation,
+                                        gpointer         user_data);
