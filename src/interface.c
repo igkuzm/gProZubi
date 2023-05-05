@@ -68,8 +68,7 @@ create_mainWindow (void)
   GtkWidget *printButton;
   GtkWidget *searchItem;
   GtkWidget *searchEntry;
-  GtkWidget *scrolledwindow1;
-  GtkWidget *mainTreeView;
+  GtkWidget *mainView;
   GtkAccelGroup *accel_group;
 
   accel_group = gtk_accel_group_new ();
@@ -227,16 +226,11 @@ create_mainWindow (void)
   gtk_container_add (GTK_CONTAINER (searchItem), searchEntry);
   gtk_entry_set_invisible_char (GTK_ENTRY (searchEntry), 9679);
 
-  scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindow1);
-  gtk_box_pack_start (GTK_BOX (mainWindowRightBox), scrolledwindow1, TRUE, TRUE, 0);
-  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_SHADOW_IN);
-
-  mainTreeView = gtk_tree_view_new ();
-  gtk_widget_show (mainTreeView);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow1), mainTreeView);
-  gtk_tree_view_set_reorderable (GTK_TREE_VIEW (mainTreeView), TRUE);
-  gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW (mainTreeView), TRUE);
+  mainView = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (mainView);
+  gtk_box_pack_start (GTK_BOX (mainWindowRightBox), mainView, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (mainView), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (mainView), GTK_SHADOW_IN);
 
   g_signal_connect ((gpointer) mainWindow, "destroy",
                     G_CALLBACK (gtk_main_quit),
@@ -336,8 +330,7 @@ create_mainWindow (void)
   GLADE_HOOKUP_OBJECT (mainWindow, printButton, "printButton");
   GLADE_HOOKUP_OBJECT (mainWindow, searchItem, "searchItem");
   GLADE_HOOKUP_OBJECT (mainWindow, searchEntry, "searchEntry");
-  GLADE_HOOKUP_OBJECT (mainWindow, scrolledwindow1, "scrolledwindow1");
-  GLADE_HOOKUP_OBJECT (mainWindow, mainTreeView, "mainTreeView");
+  GLADE_HOOKUP_OBJECT (mainWindow, mainView, "mainView");
 
   gtk_window_add_accel_group (GTK_WINDOW (mainWindow), accel_group);
 
@@ -353,7 +346,7 @@ create_casesWindow (void)
   GtkWidget *casesListToolbar;
   GtkIconSize tmp_toolbar_icon_size;
   GtkWidget *caseAddButton;
-  GtkWidget *scrolledwindow2;
+  GtkWidget *caseRemoveButton;
   GtkWidget *casesListView;
   GtkWidget *casesListInfo;
   GtkWidget *vbox4;
@@ -399,15 +392,14 @@ create_casesWindow (void)
   gtk_widget_show (caseAddButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseAddButton);
 
-  scrolledwindow2 = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindow2);
-  gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), scrolledwindow2, TRUE, TRUE, 0);
-  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow2), GTK_SHADOW_IN);
+  caseRemoveButton = (GtkWidget*) gtk_tool_button_new (NULL, _("-"));
+  gtk_widget_show (caseRemoveButton);
+  gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
 
-  casesListView = gtk_tree_view_new ();
+  casesListView = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (casesListView);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow2), casesListView);
-  gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (casesListView), FALSE);
+  gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListView, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (casesListView), GTK_SHADOW_IN);
 
   casesListInfo = gtk_label_new ("");
   gtk_widget_show (casesListInfo);
@@ -482,6 +474,9 @@ create_casesWindow (void)
   g_signal_connect ((gpointer) caseAddButton, "clicked",
                     G_CALLBACK (on_caseAddButton_clicked),
                     NULL);
+  g_signal_connect ((gpointer) caseRemoveButton, "clicked",
+                    G_CALLBACK (on_caseRemoveButton_clicked),
+                    NULL);
   g_signal_connect ((gpointer) casesWindowMenuCut, "activate",
                     G_CALLBACK (on_casesWindowMenuCut_activate),
                     NULL);
@@ -519,7 +514,7 @@ create_casesWindow (void)
   GLADE_HOOKUP_OBJECT (casesWindow, casesWindowLeftBox, "casesWindowLeftBox");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListToolbar, "casesListToolbar");
   GLADE_HOOKUP_OBJECT (casesWindow, caseAddButton, "caseAddButton");
-  GLADE_HOOKUP_OBJECT (casesWindow, scrolledwindow2, "scrolledwindow2");
+  GLADE_HOOKUP_OBJECT (casesWindow, caseRemoveButton, "caseRemoveButton");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListView, "casesListView");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListInfo, "casesListInfo");
   GLADE_HOOKUP_OBJECT (casesWindow, vbox4, "vbox4");
@@ -573,7 +568,6 @@ create_patientEditWindow (void)
   GtkWidget *patientEditCancelButton;
 
   patientEditWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_size_request (patientEditWindow, 300, 450);
   gtk_window_set_title (GTK_WINDOW (patientEditWindow), _("window1"));
   gtk_window_set_position (GTK_WINDOW (patientEditWindow), GTK_WIN_POS_CENTER);
   gtk_window_set_modal (GTK_WINDOW (patientEditWindow), TRUE);

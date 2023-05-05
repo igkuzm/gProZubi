@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 05.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -262,10 +262,17 @@ GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
 
-	/* get treeView */
-	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
+	GtkWidget * mainView = lookup_widget(mainWindow, "mainView");
+	if (!mainView){
+		g_print("Error! Can't find mainView\n");
+		return NULL;
+	}
+	gtk_container_remove (GTK_CONTAINER (mainView), 
+			gtk_bin_get_child (GTK_BIN (mainView)));
+
+	GtkWidget *treeView = gtk_tree_view_new();
 	if (!treeView){
-		g_print("Error! Can't find mainTreeView\n");
+		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
 
@@ -325,6 +332,7 @@ GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
 
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mainView), treeView);
 	gtk_widget_show(treeView);
 	return treeView;	
 }

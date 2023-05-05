@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 05.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -358,7 +358,7 @@ patient_list_remove_clicked(gpointer user_data){
 }
 
 static void
-patient_list_resize_column    (GtkTreeViewColumn       *column,
+patient_list_resize_column (GtkTreeViewColumn       *column,
                             gpointer                 w,
                             gpointer                 user_data)
 {
@@ -415,11 +415,20 @@ static GtkWidget *
 patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
+	
+	GtkWidget * mainView = lookup_widget(mainWindow, "mainView");
+	if (!mainView){
+		g_print("Error! Can't find mainView\n");
+		return NULL;
+	}
+	gtk_container_remove (GTK_CONTAINER (mainView), 
+				gtk_bin_get_child (GTK_BIN (mainView)));
 
 	/* get treeView */
-	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
+	//GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
+	GtkWidget * treeView = gtk_tree_view_new();
 	if (!treeView){
-		g_print("Error! Can't find mainTreeView\n");
+		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
 
@@ -483,7 +492,7 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 				{
 					gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
 					g_object_set(column, "expand", TRUE, NULL);	
-					/*g_object_set(renderer, "wrap-width", 300, NULL);	*/
+					g_object_set(renderer, "wrap-width", 300, NULL);	
 					g_object_set(renderer, "editable", TRUE, NULL);
 					break;
 				}			
@@ -494,9 +503,11 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 		
 		g_signal_connect ((gpointer) column, "notify::width",
-                    G_CALLBACK (patient_list_resize_column),
-                    GINT_TO_POINTER(i));		
+										G_CALLBACK (patient_list_resize_column),
+										GINT_TO_POINTER(i));		
 	}
+
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mainView), treeView);
 
 	gtk_widget_show(treeView);
 	return treeView;	

@@ -5,7 +5,6 @@
  * Last Modified Date: 05.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
@@ -79,6 +78,12 @@ void
 on_caseAddButton_clicked               (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
+	GtkWidget *window = lookup_widget(user_data, "casesWindow");;
+	GObject *delegate = G_OBJECT(window);
+	prozubi_t *p = g_object_get_data(delegate, "prozubi");
+	char *patientid = g_object_get_data(delegate, "patientid");
+	prozubi_case_new_for_patient(p, patientid);
+	cases_list_update(delegate, p, patientid);
 }
 
 void
@@ -597,6 +602,14 @@ on_patientEditWindow_size_allocate     (GtkWidget       *widget,
                                         gpointer         user_data)
 {
 	save_widget_state(widget, allocation, "patientEditWindow");
+
+}
+
+
+void
+on_caseRemoveButton_clicked            (GtkToolButton   *toolbutton,
+                                        gpointer         user_data)
+{
 
 }
 

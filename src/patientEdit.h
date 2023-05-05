@@ -121,7 +121,7 @@ patient_edit_new(
 	}
 		
 	GtkWidget *patientEditWindow = create_patientEditWindow(); 
-  widget_restore_state_from_config(patientEditWindow, "patientEditWindow", 300, 450); 
+  /*widget_restore_state_from_config(patientEditWindow, "patientEditWindow", 300, 450); */
 	char title[BUFSIZ];
 	sprintf(title, "%s %s %s", patient->familiya,
 			patient->imia, patient->otchestvo);

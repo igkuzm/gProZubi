@@ -281,3 +281,7 @@ void
 on_patientEditWindow_size_allocate     (GtkWidget       *widget,
                                         GdkRectangle    *allocation,
                                         gpointer         user_data);
+
+void
+on_caseRemoveButton_clicked            (GtkToolButton   *toolbutton,
+                                        gpointer         user_data);

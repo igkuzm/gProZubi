@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 05.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -224,15 +224,25 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	GObject *delegate = G_OBJECT(casesWindow);
 
 	/* get treeView */
-	GtkWidget * treeView = lookup_widget(casesWindow, "casesListView");
+	GtkWidget * casesListView = lookup_widget(casesWindow, "casesListView");
+	if (!casesListView){
+		g_print("Error! Can't find casesListView\n");
+		return NULL;
+	}
+	gtk_container_remove (GTK_CONTAINER (casesListView), 
+				gtk_bin_get_child (GTK_BIN (casesListView)));
+
+	GtkWidget *treeView = gtk_tree_view_new();
 	if (!treeView){
-		g_print("Error! Can't find mainTreeView\n");
+		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
 
 	/* create new model */
 	GtkTreeStore *store = cases_list_table_model_new();
 	g_object_set_data(delegate, "casesListStore", store);
+	g_object_set_data(delegate, "patientid", patientid);
+	g_object_set_data(delegate, "prozubi", p);
 
 	cases_list_update(delegate, p, patientid);
 
@@ -241,6 +251,9 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeView), GTK_TREE_MODEL(store));
 
 	//gtk_tree_view_set_activate_on_single_click(GTK_TREE_VIEW(view), TRUE);
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView)),
+			GTK_SELECTION_SINGLE);
+
 	g_object_set_data(G_OBJECT(treeView), "prozubi", p);
 	g_signal_connect(treeView, "row-activated", 
 			(GCallback) cases_list_row_activated, delegate);
