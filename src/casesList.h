@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 06.05.2023
+ * Last Modified Date: 07.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -228,6 +228,7 @@ cases_list_ask_to_remove_responce(
 		GObject *delegate = userdata;
 		struct case_t * c =  g_object_get_data(delegate, "casesToRemove"); 
 		prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
+		char * patientid =  g_object_get_data(delegate, "patientid"); 
 		
 		if (!c){
 			g_print("cases is NULL\n");
@@ -238,7 +239,7 @@ cases_list_ask_to_remove_responce(
 
 		/* remove cases and update table */
 		prozubi_case_remove(p, c);
-		cases_list_update(delegate, p, c->patientid);
+		cases_list_update(delegate, p, patientid);
 	}
 	/*gtk_window_destroy(GTK_WINDOW(dialog));*/
 	gtk_widget_destroy(GTK_WIDGET(dialog));
