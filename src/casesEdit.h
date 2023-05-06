@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 04.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 

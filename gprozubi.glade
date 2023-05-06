@@ -475,6 +475,7 @@
     <widget class="GtkHPaned" id="casesPaned">
       <property name="visible">True</property>
       <property name="can_focus">True</property>
+      <property name="position">0</property>
 
       <child>
 	<widget class="GtkVBox" id="casesWindowLeftBox">
@@ -524,7 +525,19 @@
 	      </child>
 
 	      <child>
-		<placeholder/>
+		<widget class="GtkToolButton" id="caseRefreshButton">
+		  <property name="visible">True</property>
+		  <property name="label" translatable="yes">ref</property>
+		  <property name="use_underline">True</property>
+		  <property name="visible_horizontal">True</property>
+		  <property name="visible_vertical">True</property>
+		  <property name="is_important">False</property>
+		  <signal name="clicked" handler="on_caseRefreshButton_clicked" last_modification_time="Sat, 06 May 2023 08:00:09 GMT"/>
+		</widget>
+		<packing>
+		  <property name="expand">False</property>
+		  <property name="homogeneous">True</property>
+		</packing>
 	      </child>
 	    </widget>
 	    <packing>

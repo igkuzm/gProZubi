@@ -21,6 +21,7 @@ enum {
   CASES_LIST_COLUMN_KEY,
   CASES_LIST_COLUMN_TYPE,
   CASES_LIST_COLUMN_COMBOBOX_ARRAY,
+  CASES_LIST_ALLOCATED_PTR,
   CASES_LIST_POINTER,
   CASES_LIST_N_COLUMNS
 };
@@ -32,7 +33,8 @@ cases_list_table_model_new(){
 			G_TYPE_INT, // key
 			G_TYPE_INT, // type
 			G_TYPE_POINTER, //combobox array
-			G_TYPE_POINTER
+			G_TYPE_POINTER, //case_t
+			G_TYPE_POINTER  //allocated ptr
 	);
 
 	return store;
@@ -43,8 +45,8 @@ cases_list_table_model_free(GtkTreeModel* model, GtkTreePath* path,
 		GtkTreeIter* iter, gpointer data) 
 {
 	struct case_t * c;
-	gtk_tree_model_get(model, iter, CASES_LIST_POINTER, &c, -1);	
-	prozubi_case_free(&c);
+	gtk_tree_model_get(model, iter, CASES_LIST_ALLOCATED_PTR, &c, -1);	
+	prozubi_case_free(c);
 	return FALSE;
 }
 
@@ -52,6 +54,7 @@ static void *
 cases_list_fill_table(
 		void *user_data,
 		struct case_t *c,
+		void *allocated_ptr,
 		void * parent,
 		bool has_children,
 		char * title,
@@ -71,6 +74,7 @@ cases_list_fill_table(
 			CASES_LIST_COLUMN_KEY,            key,
 			CASES_LIST_COLUMN_TYPE,           type,
 			CASES_LIST_COLUMN_COMBOBOX_ARRAY, array,
+			CASES_LIST_ALLOCATED_PTR,         allocated_ptr,
 			CASES_LIST_POINTER,               c,
 	-1);
 

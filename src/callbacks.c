@@ -618,3 +618,16 @@ on_caseRemoveButton_clicked            (GtkToolButton   *toolbutton,
 	cases_list_remove_clicked(toolbutton);
 }
 
+
+void
+on_caseRefreshButton_clicked           (GtkToolButton   *toolbutton,
+                                        gpointer         user_data)
+{
+	GtkWidget *window = lookup_widget(GTK_WIDGET(toolbutton), "casesWindow");;
+	GObject *delegate = G_OBJECT(window);
+	prozubi_t *p = g_object_get_data(delegate, "prozubi");
+	char *patientid = g_object_get_data(delegate, "patientid");
+	cases_list_update(delegate, p, patientid);
+}
+
+

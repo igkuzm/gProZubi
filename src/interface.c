@@ -347,6 +347,7 @@ create_casesWindow (void)
   GtkIconSize tmp_toolbar_icon_size;
   GtkWidget *caseAddButton;
   GtkWidget *caseRemoveButton;
+  GtkWidget *caseRefreshButton;
   GtkWidget *casesListView;
   GtkWidget *casesListInfo;
   GtkWidget *vbox4;
@@ -377,6 +378,7 @@ create_casesWindow (void)
   casesPaned = gtk_hpaned_new ();
   gtk_widget_show (casesPaned);
   gtk_container_add (GTK_CONTAINER (casesWindow), casesPaned);
+  gtk_paned_set_position (GTK_PANED (casesPaned), 0);
 
   casesWindowLeftBox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (casesWindowLeftBox);
@@ -395,6 +397,10 @@ create_casesWindow (void)
   caseRemoveButton = (GtkWidget*) gtk_tool_button_new (NULL, _("-"));
   gtk_widget_show (caseRemoveButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
+
+  caseRefreshButton = (GtkWidget*) gtk_tool_button_new (NULL, _("ref"));
+  gtk_widget_show (caseRefreshButton);
+  gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRefreshButton);
 
   casesListView = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (casesListView);
@@ -477,6 +483,9 @@ create_casesWindow (void)
   g_signal_connect ((gpointer) caseRemoveButton, "clicked",
                     G_CALLBACK (on_caseRemoveButton_clicked),
                     NULL);
+  g_signal_connect ((gpointer) caseRefreshButton, "clicked",
+                    G_CALLBACK (on_caseRefreshButton_clicked),
+                    NULL);
   g_signal_connect ((gpointer) casesWindowMenuCut, "activate",
                     G_CALLBACK (on_casesWindowMenuCut_activate),
                     NULL);
@@ -515,6 +524,7 @@ create_casesWindow (void)
   GLADE_HOOKUP_OBJECT (casesWindow, casesListToolbar, "casesListToolbar");
   GLADE_HOOKUP_OBJECT (casesWindow, caseAddButton, "caseAddButton");
   GLADE_HOOKUP_OBJECT (casesWindow, caseRemoveButton, "caseRemoveButton");
+  GLADE_HOOKUP_OBJECT (casesWindow, caseRefreshButton, "caseRefreshButton");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListView, "casesListView");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListInfo, "casesListInfo");
   GLADE_HOOKUP_OBJECT (casesWindow, vbox4, "vbox4");
