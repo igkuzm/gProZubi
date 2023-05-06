@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 05.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -24,7 +24,13 @@
 #include "configFile.h"
 
 void clear_columns(GtkWidget *mainWindow){
-	GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
+	
+	GObject *delegate = G_OBJECT(mainWindow);
+	GtkWidget * treeView = g_object_get_data(delegate, "mainTreeView");
+	if (!treeView){
+		g_print("Error! Can't get treeView\n");
+		return;
+	}
 	GList *columns = 
 			gtk_tree_view_get_columns(GTK_TREE_VIEW(treeView));
 	
@@ -41,7 +47,7 @@ void
 on_patientListButton_clicked           (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget *mainWindow = lookup_widget(user_data, "mainWindow");;
+	GtkWidget *mainWindow = lookup_widget(GTK_WIDGET(button), "mainWindow");;
 	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
 	clear_columns(mainWindow);
 	patient_list_new(mainWindow, p);
@@ -52,7 +58,7 @@ void
 on_doctorListButton_clicked            (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget *mainWindow = lookup_widget(user_data, "mainWindow");;
+	GtkWidget *mainWindow = lookup_widget(GTK_WIDGET(button), "mainWindow");;
 	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
 	clear_columns(mainWindow);
 	doctor_list_new(mainWindow, p);
@@ -78,7 +84,7 @@ void
 on_caseAddButton_clicked               (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	GtkWidget *window = lookup_widget(user_data, "casesWindow");;
+	GtkWidget *window = lookup_widget(GTK_WIDGET(toolbutton), "casesWindow");;
 	GObject *delegate = G_OBJECT(window);
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 	char *patientid = g_object_get_data(delegate, "patientid");
@@ -262,12 +268,12 @@ on_editButton_clicked                  (GtkToolButton   *toolbutton,
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 
 	/* get treeView */
-	GtkWidget * treeView = 
-			lookup_widget(GTK_WIDGET(delegate), "mainTreeView");
+	GtkWidget * treeView = g_object_get_data(delegate, "mainTreeView");
 	if (!treeView){
-		g_print("Error! Can't find mainTreeView\n");
+		g_print("Error! Can't get treeView\n");
 		return;
 	}
+
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
 	if (!selection){
@@ -584,7 +590,6 @@ void
 on_casesWindowDelete_activate          (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-
 }
 
 
@@ -610,6 +615,6 @@ void
 on_caseRemoveButton_clicked            (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-
+	cases_list_remove_clicked(toolbutton);
 }
 

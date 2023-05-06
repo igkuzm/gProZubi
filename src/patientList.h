@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 05.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -314,10 +314,9 @@ patient_list_remove_clicked(gpointer user_data){
 	GObject *delegate = G_OBJECT(mainWindow);	
 	
 	/* get treeView */
-	GtkWidget * treeView = 
-			lookup_widget(GTK_WIDGET(delegate), "mainTreeView");
+	GtkWidget * treeView = g_object_get_data(delegate, "mainTreeView");
 	if (!treeView){
-		g_print("Error! Can't find mainTreeView\n");
+		g_print("Error! Can't get treeView\n");
 		return;
 	}
 
@@ -327,7 +326,7 @@ patient_list_remove_clicked(gpointer user_data){
 		return;
 	}
 	
-	GtkTreeModel *model = g_object_get_data(delegate, "patientListStore"); 
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeView)); 
 	if (!model){
 		g_print("Error! Can't get model\n");
 		return;
@@ -421,8 +420,10 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		g_print("Error! Can't find mainView\n");
 		return NULL;
 	}
-	gtk_container_remove (GTK_CONTAINER (mainView), 
-				gtk_bin_get_child (GTK_BIN (mainView)));
+
+	GtkWidget * oldWidget = gtk_bin_get_child (GTK_BIN (mainView)); 
+	if (oldWidget)
+		gtk_container_remove (GTK_CONTAINER (mainView), oldWidget); 
 
 	/* get treeView */
 	//GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
@@ -431,6 +432,8 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
+
+	g_object_set_data(delegate, "mainTreeView", treeView);
 
 	/* create new model */
 	GtkListStore *store = patient_list_table_model_new();

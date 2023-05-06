@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 05.05.2023
+ * Last Modified Date: 06.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -44,7 +44,7 @@ cases_list_table_model_free(GtkTreeModel* model, GtkTreePath* path,
 {
 	struct case_t * c;
 	gtk_tree_model_get(model, iter, CASES_LIST_POINTER, &c, -1);	
-	prozubi_case_free(c);
+	prozubi_case_free(&c);
 	return FALSE;
 }
 
@@ -154,6 +154,64 @@ cases_list_row_activated(
 }
 
 static void 
+cases_list_cursor_changed(
+		GtkTreeView *treeview, 
+		gpointer userdata
+		)
+{
+	g_print("CURSOR CHANGED!\n");
+	GObject *delegate = userdata;	
+	
+	prozubi_t *p = g_object_get_data(G_OBJECT(treeview), "prozubi");
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
+	if (!selection){
+		g_print("Error! Can't get selection\n");
+		return;
+	}
+	
+	GtkTreeModel *model = gtk_tree_view_get_model(treeview); 
+	if (!model){
+		g_print("Error! Can't get model\n");
+		return;
+	}	
+
+	GList *rows = 
+			gtk_tree_selection_get_selected_rows(selection, &model);
+	if (!rows){
+		g_print("Error! Can't get rows\n");
+		return;
+	}	
+
+	GtkTreePath *path = rows->data;
+	if (!path){
+		g_print("Error! Can't get path\n");
+		return;
+	}	
+
+	GtkTreeIter iter;
+	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		/* expand/collapse row */
+		if (gtk_tree_model_iter_has_child(model, &iter))
+			return;
+				
+		CASES key;
+		CASES_LIST_TYPE type;
+		char **combobox_array;
+		struct case_t *c;
+
+		gtk_tree_model_get(model, &iter, 
+				CASES_LIST_POINTER, &c,
+				CASES_LIST_COLUMN_TYPE, &type,
+				CASES_LIST_COLUMN_COMBOBOX_ARRAY, &combobox_array,
+				CASES_LIST_COLUMN_KEY, &key, -1); 
+
+		/* todo: refresh casesEditWindow */
+		cases_edit_refresh(GTK_WIDGET(delegate), p, c, key, type, combobox_array);
+	}	
+}
+
+static void 
 cases_list_ask_to_remove_responce(
 		GtkDialog *dialog, 
 		gint responce, 
@@ -164,9 +222,10 @@ cases_list_ask_to_remove_responce(
 		g_print("Remove commited\n");
 
 		GObject *delegate = userdata;
-		struct cases * cases =  g_object_get_data(delegate, "casesToRemove"); 
+		struct case_t * c =  g_object_get_data(delegate, "casesToRemove"); 
+		prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 		
-		if (!cases){
+		if (!c){
 			g_print("cases is NULL\n");
 			/*gtk_window_destroy(GTK_WINDOW(dialog));*/
 			gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -174,9 +233,8 @@ cases_list_ask_to_remove_responce(
 		}		
 
 		/* remove cases and update table */
-		/*! TODO: remove parient
-		*  \todo remove parient
-		*/
+		prozubi_case_remove(p, c);
+		cases_list_update(delegate, p, c->patientid);
 	}
 	/*gtk_window_destroy(GTK_WINDOW(dialog));*/
 	gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -188,12 +246,12 @@ cases_list_ask_to_remove(GObject *delegate, struct case_t * c) {
 		g_print("cases is NULL\n");
 		return;
 	}
-	
+
 	g_object_set_data(delegate, "casesToRemove", c);
 	
-	char *t = NULL;
 	cJSON *json = c->case_list;
 	cJSON *title = cJSON_GetObjectItem(json, "parent");
+	char *t = cJSON_GetStringValue(title);
 	
 	GtkWidget * mainWindow = GTK_WIDGET(delegate); 
 	GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
@@ -218,6 +276,62 @@ cases_list_ask_to_remove(GObject *delegate, struct case_t * c) {
 	gtk_widget_show_all(dialog);
 }
 
+static void
+cases_list_remove_clicked(gpointer user_data){
+	
+	/* get mainWindow */
+	GtkWidget * casesWindow = 
+			lookup_widget(GTK_WIDGET(user_data), "casesWindow");
+	if (!casesWindow){
+		g_print("Error! Can't find casesWindow\n");
+		return;
+	}	
+	GObject *delegate = G_OBJECT(casesWindow);	
+	
+	/* get treeView */
+	GtkWidget * treeView = g_object_get_data(delegate, "treeView");
+	if (!treeView){
+		g_print("Error! Can't get treeView\n");
+		return;
+	}
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
+	if (!selection){
+		g_print("Error! Can't get selection\n");
+		return;
+	}
+	
+	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeView)); 
+	if (!model){
+		g_print("Error! Can't get model\n");
+		return;
+	}	
+
+	GList *rows = 
+			gtk_tree_selection_get_selected_rows(selection, &model);
+	if (!rows){
+		g_print("Error! Can't get rows\n");
+		return;
+	}	
+
+	GtkTreePath *path = rows->data;
+	if (!path){
+		g_print("Error! Can't get path\n");
+		return;
+	}	
+
+	GtkTreeIter iter;
+	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		struct case_t *c;
+		gtk_tree_model_get(model, &iter, CASES_LIST_POINTER, &c, -1); 			
+		
+		if (c){
+			cases_list_ask_to_remove(delegate, c);
+		}
+	}
+}
+
+
 static GtkWidget *
 cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	/* set delegate */
@@ -229,14 +343,16 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 		g_print("Error! Can't find casesListView\n");
 		return NULL;
 	}
-	gtk_container_remove (GTK_CONTAINER (casesListView), 
-				gtk_bin_get_child (GTK_BIN (casesListView)));
+	GtkWidget * oldWidget = gtk_bin_get_child (GTK_BIN (casesListView)); 
+	if (oldWidget)
+		gtk_container_remove (GTK_CONTAINER (casesListView), oldWidget); 
 
 	GtkWidget *treeView = gtk_tree_view_new();
 	if (!treeView){
 		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
+	g_object_set_data(delegate, "treeView", treeView);
 
 	/* create new model */
 	GtkTreeStore *store = cases_list_table_model_new();
@@ -257,6 +373,9 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	g_object_set_data(G_OBJECT(treeView), "prozubi", p);
 	g_signal_connect(treeView, "row-activated", 
 			(GCallback) cases_list_row_activated, delegate);
+	
+	g_signal_connect(treeView, "cursor-changed", 
+			(GCallback) cases_list_cursor_changed, delegate);
 
 	const char *column_titles[] = {
 		""
@@ -294,6 +413,8 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 		
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
+
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesListView), treeView);	
 
 	gtk_widget_show(treeView);
 	return treeView;	
