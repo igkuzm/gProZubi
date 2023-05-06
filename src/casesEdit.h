@@ -111,6 +111,10 @@ static void draw_zubformula(
 {
 	GdkPixbuf *pixbuf = 
 			gdk_pixbuf_new_from_file("src/images/zubFormula.jpg", NULL);
+	if (!pixbuf){
+		g_print("can't load image: %s", "src/images/zubFormula.jpg");
+		return;
+	}
 
 	GdkPixmap *pixmap;
 	GdkBitmap *mask;
