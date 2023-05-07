@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 06.05.2023
+ * Last Modified Date: 07.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,6 +12,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include "prozubilib/cases.h"
+#include "prozubilib/planlecheniya.h"
 #include "support.h"
 
 #include "prozubilib/prozubilib.h"
@@ -548,6 +549,18 @@ cases_edit_refresh(
 				draw_zubformula(c, image);
 
 				return image;
+			}			
+
+		case CASES_LIST_TYPE_PLANLECHENIYA:
+			{
+				GtkWidget *bbox = gtk_vbutton_box_new();
+				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
+				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
+						bbox);
+				gtk_widget_show(bbox);
+				
+
+				return NULL;
 			}			
 
 		default:
