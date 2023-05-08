@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 07.05.2023
+ * Last Modified Date: 08.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -382,7 +382,7 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 	for (i = 0; i < PLAN_LECHENIYA_N_COLUMNS -1; ++i) {
 		
 		GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
-		g_object_set(renderer, "editable", FALSE, NULL);
+		g_object_set(renderer, "editable", TRUE, NULL);
 		g_object_set(renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
 		g_object_set(renderer, "wrap-width", 300, NULL);	
 		
