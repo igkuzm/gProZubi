@@ -10,6 +10,7 @@
 #define PLAN_LECHENIYA_H
 
 #include <gtk/gtk.h>
+#include "pango/pango-font.h"
 #include "prozubilib/cases.h"
 #include "support.h"
 
@@ -20,19 +21,25 @@ enum {
   PLAN_LECHENIYA_COLUMN_COUNT,
   PLAN_LECHENIYA_COLUMN_PRICE,
   PLAN_LECHENIYA_COLUMN_TOTAL,
-  PLAN_LECHENIYA_BUTTON,
+  PLAN_LECHENIYA_COLUMN_REMOVE,
+  PLAN_LECHENIYA_N_COLUMNS,
+	PLAN_LECHENIYA_IS_EDITABLE,
+	PLAN_LECHENIYA_PANGO_STYLE,
   PLAN_LECHENIYA_POINTER,
-  PLAN_LECHENIYA_N_COLUMNS
+  PLAN_LECHENIYA_N_VALUES
 };
 
 static GtkTreeStore *
 plan_lecheniya_table_model_new(){
-	GtkTreeStore *store = gtk_tree_store_new(PLAN_LECHENIYA_N_COLUMNS, 
+	GtkTreeStore *store = gtk_tree_store_new(PLAN_LECHENIYA_N_VALUES, 
 			G_TYPE_STRING, // title
 			G_TYPE_INT, // count
 			G_TYPE_INT, // price
 			G_TYPE_INT, // total
-			G_TYPE_POINTER, //button
+			G_TYPE_POINTER, //remove
+			G_TYPE_POINTER, //ncols
+			G_TYPE_BOOLEAN, //editable
+			G_TYPE_INT,     //style
 			G_TYPE_POINTER //cJSON
 	);
 
@@ -66,16 +73,32 @@ plan_lecheniya_fill_table(
 	GObject *delegate = userdata;
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");	
 
+	gboolean editable = TRUE;
+	gint style = PANGO_STYLE_NORMAL;
+	if (type == PLANLECHENIYA_TYPE_STAGE ||
+			type == PLANLECHENIYA_TYPE_STAGE_PRICE ||
+			type == PLANLECHENIYA_TYPE_STAGE_DURATION ||
+			type == PLANLECHENIYA_TYPE_TOTAL_PRICE ||
+			type == PLANLECHENIYA_TYPE_TOTAL_DURATION
+			)
+	{
+		style = PANGO_STYLE_OBLIQUE;
+		editable = FALSE;
+	}
+
 	GtkTreeIter * parent_iter = parent;
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, parent);
 	gtk_tree_store_set(store, &iter, 
-			PLAN_LECHENIYA_COLUMN_TITLE, title,
-			PLAN_LECHENIYA_COLUMN_COUNT, count,
-			PLAN_LECHENIYA_COLUMN_PRICE, price,
-			PLAN_LECHENIYA_COLUMN_TOTAL, total,
-			PLAN_LECHENIYA_BUTTON,       NULL,
-			PLAN_LECHENIYA_POINTER,      json,
+			PLAN_LECHENIYA_COLUMN_TITLE,  title,
+			PLAN_LECHENIYA_COLUMN_COUNT,  count,
+			PLAN_LECHENIYA_COLUMN_PRICE,  price,
+			PLAN_LECHENIYA_COLUMN_TOTAL,  total,
+			PLAN_LECHENIYA_COLUMN_REMOVE, NULL,
+			PLAN_LECHENIYA_N_COLUMNS,     NULL,
+			PLAN_LECHENIYA_IS_EDITABLE,   editable,
+			PLAN_LECHENIYA_PANGO_STYLE,   style,
+			PLAN_LECHENIYA_POINTER,       json,
 	-1);
 
 	return gtk_tree_iter_copy(&iter);
@@ -333,6 +356,71 @@ plan_lecheniya_remove_clicked(gpointer user_data){
 	//}
 }
 
+static void 
+plan_lecheniya_table_cell_edited_callback (
+		GtkCellRendererText *cell, 
+		gchar *path_string, 
+		gchar *new_text, 
+		gpointer user_data
+		)
+{
+	guint column_number = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(cell), "column_number"));
+	g_print("EDITED path: %s, col: %d\n", path_string, column_number);
+	
+	//get application delegate
+	GObject *delegate = g_object_get_data(G_OBJECT(cell), "delegate");
+
+	// we HAVE TO use GtkTreeView within gpointer!
+	//  otherwise we could not differntiate the model type!
+	GtkTreeView  *treeview  = GTK_TREE_VIEW(user_data);
+	GtkTreeModel *treeModel = gtk_tree_view_get_model(treeview);
+
+	// we need to use GtkListStore, because GtkTreeModel does not
+	//  provide an interface for cell changing.
+	GtkListStore *model;   
+	GtkTreeIter iter_rawModel;
+
+	// check if we're working on the raw model or on a sorted version
+	//  of it
+	if(GTK_IS_LIST_STORE(treeModel)){
+		// just use the model as is    
+		model = GTK_LIST_STORE(treeModel);
+
+		// retrieve the iterator for the cell, that should be changed
+		gtk_tree_model_get_iter_from_string((GtkTreeModel*)model, &iter_rawModel, path_string);
+
+	} else { // we're working on a sorted model   
+		// We need to change to a usual model.
+		GtkTreeModelSort *sortedModel = GTK_TREE_MODEL_SORT(treeModel);
+		model = GTK_LIST_STORE(gtk_tree_model_sort_get_model(sortedModel));
+
+		// get the iterator within the sorted model
+		GtkTreeIter iter_sortedModel;
+		gtk_tree_model_get_iter_from_string((GtkTreeModel*)sortedModel, &iter_sortedModel, path_string);  
+
+		// convert the iterator to one of the raw model.
+		// (Otherwise the wrong cell will change)
+		gtk_tree_model_sort_convert_iter_to_child_iter(sortedModel, &iter_rawModel, &iter_sortedModel);
+    }
+
+	//struct passport_t * c;
+	//gtk_tree_model_get(treeModel, &iter_rawModel, PATIENT_LIST_POINTER, &c, -1); 			
+	//prozubi_t *p = g_object_get_data(G_OBJECT(cell), "prozubi");
+
+	//if (!c || !p)
+		//return;
+	
+	//switch (column_number) {
+		//case PATIENT_LIST_COLUMN_COMMENT:
+			//{
+				//if (!prozubi_passport_set_PASSPORTCOMMENT(p, c, new_text, true))
+					//gtk_list_store_set(GTK_LIST_STORE(model), &iter_rawModel, column_number, new_text, -1);				
+				//break;
+			//}			
+		//default: break;
+	//}
+}
+
 
 static GtkWidget *
 plan_lecheniya_new(GtkWidget *parent, cJSON *json){
@@ -379,33 +467,99 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 	
 	/* fill tableView */
 	int i;
-	for (i = 0; i < PLAN_LECHENIYA_N_COLUMNS -1; ++i) {
+	for (i = 0; i < PLAN_LECHENIYA_N_COLUMNS; ++i) {
 		
-		GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
-		g_object_set(renderer, "editable", TRUE, NULL);
-		g_object_set(renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
-		g_object_set(renderer, "wrap-width", 300, NULL);	
-		
-		//g_signal_connect(renderer, "edited", 
-				//(GCallback) plan_lecheniya_table_cell_edited_callback, treeView);
-		
-		g_object_set_data(G_OBJECT(renderer), "column_number", GUINT_TO_POINTER(i));
-		g_object_set_data(G_OBJECT(renderer), "delegate", delegate);
-		
-		GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
-				column_titles[i], renderer, "text", i,  NULL);
+		GtkTreeViewColumn *column; 
 
 		switch (i) {
 			case PLAN_LECHENIYA_COLUMN_TITLE:
 				{
-					gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
+					GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
+					g_object_set(renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
+					g_object_set(renderer, "wrap-width", 300, NULL);	
+					g_object_set_data(G_OBJECT(renderer), "column_number", GUINT_TO_POINTER(i));
+					g_object_set_data(G_OBJECT(renderer), "delegate", delegate);
+					g_signal_connect(renderer, "edited", 
+							(GCallback) plan_lecheniya_table_cell_edited_callback, treeView);
+		
+					//gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
+		
+					column = gtk_tree_view_column_new_with_attributes(
+							column_titles[i], renderer, 
+							"text", i,
+							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"style", PLAN_LECHENIYA_PANGO_STYLE,
+							NULL);
 					g_object_set(column, "expand", TRUE, NULL);	
+					g_object_set(column, "resizable", TRUE, NULL);	
 					break;
 				}			
-			
+			case PLAN_LECHENIYA_COLUMN_COUNT:
+				{
+					GtkCellRenderer	*renderer = gtk_cell_renderer_spin_new();
+					g_object_set(renderer, "editable", TRUE, NULL);
+					g_object_set_data(G_OBJECT(renderer), "column_number", GUINT_TO_POINTER(i));
+					g_object_set_data(G_OBJECT(renderer), "delegate", delegate);
+					g_signal_connect(renderer, "edited", 
+							(GCallback) plan_lecheniya_table_cell_edited_callback, treeView);
+
+					GtkObject *adjustment = gtk_adjustment_new(0, 0, 100, 1, 10, 0);
+					g_object_set(renderer, "adjustment", adjustment, NULL);
+		
+					gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
+		
+					column = gtk_tree_view_column_new_with_attributes(
+							column_titles[i], renderer, 
+							"text", i, 
+							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"style", PLAN_LECHENIYA_PANGO_STYLE,
+							NULL);
+					g_object_set(column, "resizable", TRUE, NULL);	
+					break;
+				}
+			case PLAN_LECHENIYA_COLUMN_PRICE:
+				{
+					GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
+					g_object_set(renderer, "editable", TRUE, NULL);
+					g_object_set_data(G_OBJECT(renderer), "column_number", GUINT_TO_POINTER(i));
+					g_object_set_data(G_OBJECT(renderer), "delegate", delegate);
+					g_signal_connect(renderer, "edited", 
+							(GCallback) plan_lecheniya_table_cell_edited_callback, treeView);
+		
+					//gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
+		
+					column = gtk_tree_view_column_new_with_attributes(
+							column_titles[i], renderer, 
+							"text", i, 
+							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"style", PLAN_LECHENIYA_PANGO_STYLE,
+							NULL);
+					g_object_set(column, "resizable", TRUE, NULL);	
+					break;
+				}
+			case PLAN_LECHENIYA_COLUMN_TOTAL:
+				{
+					GtkCellRenderer	*renderer = gtk_cell_renderer_text_new();
+					g_object_set(renderer, "editable", FALSE, NULL);
+		
+					//gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
+		
+					column = gtk_tree_view_column_new_with_attributes(
+							column_titles[i], renderer, "text", i,  NULL);
+					g_object_set(column, "resizable", TRUE, NULL);	
+					break;
+				}
+				case PLAN_LECHENIYA_COLUMN_REMOVE:
+				{
+					column = gtk_tree_view_column_new();
+					gtk_tree_view_column_set_title(column, column_titles[i]);
+					g_object_set(column, "resizable", TRUE, NULL);	
+					break;
+				}
+				
+
 			default: break;
 		}
-		g_object_set(column, "resizable", TRUE, NULL);	
 		
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
