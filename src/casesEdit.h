@@ -14,6 +14,7 @@
 #include "prozubilib/cases.h"
 #include "prozubilib/planlecheniya.h"
 #include "support.h"
+#include "planLecheniya.h"
 
 #include "prozubilib/prozubilib.h"
 
@@ -553,14 +554,9 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_PLANLECHENIYA:
 			{
-				GtkWidget *bbox = gtk_vbutton_box_new();
-				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
-						bbox);
-				gtk_widget_show(bbox);
-				
+				GtkWidget *pl = plan_lecheniya_new(casesEditWindow, c->planlecheniya);	
 
-				return NULL;
+				return pl;
 			}			
 
 		default:
