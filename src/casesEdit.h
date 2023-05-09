@@ -436,7 +436,7 @@ cases_edit_refresh(
 				gtk_widget_show(toolbar);
 
 				//toolbar buttons
-				GtkToolItem *share = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_GO_UP);
+				GtkToolItem *share = gtk_tool_button_new_from_stock(GTK_STOCK_GO_UP);
 				gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(share));
 				gtk_widget_show(GTK_WIDGET(share));
 
@@ -577,7 +577,7 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_PLANLECHENIYA:
 			{
-				GtkWidget *pl = plan_lecheniya_new(casesEditFrame, delegate, c->planlecheniya, p, c);	
+				GtkWidget *pl = plan_lecheniya_new(casesEditFrame, c->planlecheniya, p, c);	
 				return pl;
 			}			
 
