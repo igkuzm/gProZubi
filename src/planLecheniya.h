@@ -479,7 +479,7 @@ plan_lecheniya_ask_to_remove(GObject *delegate, gchar *path) {
 			GTK_DIALOG_MODAL,
 			GTK_MESSAGE_QUESTION,
 			GTK_BUTTONS_NONE,
-			"Удалить из базы: %s?", title);
+			"Удалить из плана %s?", title);
 	gtk_window_set_title(GTK_WINDOW(dialog), "Удалить?");
 
 	//add remove button

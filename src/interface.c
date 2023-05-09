@@ -363,6 +363,7 @@ create_casesWindow (void)
   casesPaned = gtk_hpaned_new ();
   gtk_widget_show (casesPaned);
   gtk_container_add (GTK_CONTAINER (casesWindow), casesPaned);
+  gtk_paned_set_position (GTK_PANED (casesPaned), 0);
 
   casesWindowLeftBox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (casesWindowLeftBox);
@@ -371,18 +372,18 @@ create_casesWindow (void)
   casesListToolbar = gtk_toolbar_new ();
   gtk_widget_show (casesListToolbar);
   gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListToolbar, FALSE, FALSE, 0);
-  gtk_toolbar_set_style (GTK_TOOLBAR (casesListToolbar), GTK_TOOLBAR_TEXT);
+  gtk_toolbar_set_style (GTK_TOOLBAR (casesListToolbar), GTK_TOOLBAR_ICONS);
   tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (casesListToolbar));
 
-  caseAddButton = (GtkWidget*) gtk_tool_button_new (NULL, _("+"));
+  caseAddButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-add");
   gtk_widget_show (caseAddButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseAddButton);
 
-  caseRemoveButton = (GtkWidget*) gtk_tool_button_new (NULL, _("-"));
+  caseRemoveButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-remove");
   gtk_widget_show (caseRemoveButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
 
-  caseRefreshButton = (GtkWidget*) gtk_tool_button_new (NULL, _("ref"));
+  caseRefreshButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-refresh");
   gtk_widget_show (caseRefreshButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRefreshButton);
 

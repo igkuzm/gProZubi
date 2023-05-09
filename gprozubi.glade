@@ -475,6 +475,7 @@
     <widget class="GtkHPaned" id="casesPaned">
       <property name="visible">True</property>
       <property name="can_focus">True</property>
+      <property name="position">0</property>
 
       <child>
 	<widget class="GtkVBox" id="casesWindowLeftBox">
@@ -487,15 +488,14 @@
 	    <widget class="GtkToolbar" id="casesListToolbar">
 	      <property name="visible">True</property>
 	      <property name="orientation">GTK_ORIENTATION_HORIZONTAL</property>
-	      <property name="toolbar_style">GTK_TOOLBAR_TEXT</property>
+	      <property name="toolbar_style">GTK_TOOLBAR_ICONS</property>
 	      <property name="tooltips">True</property>
 	      <property name="show_arrow">True</property>
 
 	      <child>
 		<widget class="GtkToolButton" id="caseAddButton">
 		  <property name="visible">True</property>
-		  <property name="label" translatable="yes">+</property>
-		  <property name="use_underline">True</property>
+		  <property name="stock_id">gtk-add</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -510,8 +510,7 @@
 	      <child>
 		<widget class="GtkToolButton" id="caseRemoveButton">
 		  <property name="visible">True</property>
-		  <property name="label" translatable="yes">-</property>
-		  <property name="use_underline">True</property>
+		  <property name="stock_id">gtk-remove</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -526,8 +525,7 @@
 	      <child>
 		<widget class="GtkToolButton" id="caseRefreshButton">
 		  <property name="visible">True</property>
-		  <property name="label" translatable="yes">ref</property>
-		  <property name="use_underline">True</property>
+		  <property name="stock_id">gtk-refresh</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
