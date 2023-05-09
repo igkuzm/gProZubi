@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 07.05.2023
+ * Last Modified Date: 09.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -341,6 +341,14 @@ static GtkWidget *
 cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(casesWindow);
+
+	/* get toolbar */
+	GtkWidget * toolbar = lookup_widget(casesWindow, "casesListToolbar");
+	if (!toolbar){
+		g_print("Error! Can't find casesListToolbar\n");
+		return NULL;
+	}
+	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
 	/* get treeView */
 	GtkWidget * casesListView = lookup_widget(casesWindow, "casesListView");
