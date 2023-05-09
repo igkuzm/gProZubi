@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 08.05.2023
+ * Last Modified Date: 09.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,7 +10,9 @@
 #define PLAN_LECHENIYA_H
 
 #include <gtk/gtk.h>
-#include "pango/pango-font.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "prozubilib/prozubilib.h"
 #include "prozubilib/cases.h"
 #include "support.h"
 
@@ -21,11 +23,13 @@ enum {
   PLAN_LECHENIYA_COLUMN_COUNT,
   PLAN_LECHENIYA_COLUMN_PRICE,
   PLAN_LECHENIYA_COLUMN_TOTAL,
-  PLAN_LECHENIYA_COLUMN_REMOVE,
+  PLAN_LECHENIYA_COLUMN_BUTTON,
   PLAN_LECHENIYA_N_COLUMNS,
-	PLAN_LECHENIYA_IS_EDITABLE,
+	PLAN_LECHENIYA_IS_TITLE_PRICE_EDITABLE,
+	PLAN_LECHENIYA_IS_COUNT_EDITABLE,
 	PLAN_LECHENIYA_PANGO_STYLE,
-  PLAN_LECHENIYA_POINTER,
+  PLAN_LECHENIYA_TYPE,
+  PLAN_LECHENIYA_KOD,
   PLAN_LECHENIYA_N_VALUES
 };
 
@@ -33,14 +37,16 @@ static GtkTreeStore *
 plan_lecheniya_table_model_new(){
 	GtkTreeStore *store = gtk_tree_store_new(PLAN_LECHENIYA_N_VALUES, 
 			G_TYPE_STRING, // title
-			G_TYPE_INT, // count
-			G_TYPE_INT, // price
-			G_TYPE_INT, // total
-			G_TYPE_POINTER, //remove
+			G_TYPE_STRING, // count
+			G_TYPE_STRING, // price
+			G_TYPE_STRING, // total
+			G_TYPE_STRING, //remove
 			G_TYPE_POINTER, //ncols
-			G_TYPE_BOOLEAN, //editable
+			G_TYPE_BOOLEAN, //title/price editable
+			G_TYPE_BOOLEAN, //count editable
 			G_TYPE_INT,     //style
-			G_TYPE_POINTER //cJSON
+			G_TYPE_INT,     //type
+			G_TYPE_STRING   //kod
 	);
 
 	return store;
@@ -65,16 +71,25 @@ plan_lecheniya_fill_table(
 			int index,
 			char * title,
 			char * kod,
-			int price,
-			int count,
-			int total
+			char * price,
+			char * count,
+			char * total
 		)
 {
 	GObject *delegate = userdata;
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");	
 
-	gboolean editable = TRUE;
+	char * stock_id = NULL;
+	gboolean tp_editable = TRUE, count_editable = TRUE;
 	gint style = PANGO_STYLE_NORMAL;
+	
+	if (type == PLANLECHENIYA_TYPE_ITEM){
+		stock_id = GTK_STOCK_REMOVE; 
+	}
+	if (type == PLANLECHENIYA_TYPE_STAGE){
+		stock_id = GTK_STOCK_ADD; 
+	}
+
 	if (type == PLANLECHENIYA_TYPE_STAGE ||
 			type == PLANLECHENIYA_TYPE_STAGE_PRICE ||
 			type == PLANLECHENIYA_TYPE_STAGE_DURATION ||
@@ -83,7 +98,11 @@ plan_lecheniya_fill_table(
 			)
 	{
 		style = PANGO_STYLE_OBLIQUE;
-		editable = FALSE;
+		tp_editable = FALSE;
+		count_editable = FALSE;
+	}
+	if (type == PLANLECHENIYA_TYPE_STAGE_DURATION) {
+		count_editable = TRUE;
 	}
 
 	GtkTreeIter * parent_iter = parent;
@@ -94,11 +113,13 @@ plan_lecheniya_fill_table(
 			PLAN_LECHENIYA_COLUMN_COUNT,  count,
 			PLAN_LECHENIYA_COLUMN_PRICE,  price,
 			PLAN_LECHENIYA_COLUMN_TOTAL,  total,
-			PLAN_LECHENIYA_COLUMN_REMOVE, NULL,
+			PLAN_LECHENIYA_COLUMN_BUTTON, stock_id,
 			PLAN_LECHENIYA_N_COLUMNS,     NULL,
-			PLAN_LECHENIYA_IS_EDITABLE,   editable,
+			PLAN_LECHENIYA_IS_TITLE_PRICE_EDITABLE,   tp_editable,
+			PLAN_LECHENIYA_IS_COUNT_EDITABLE,   count_editable,
 			PLAN_LECHENIYA_PANGO_STYLE,   style,
-			PLAN_LECHENIYA_POINTER,       json,
+			PLAN_LECHENIYA_TYPE,          type,
+			PLAN_LECHENIYA_KOD,           kod,
 	-1);
 
 	return gtk_tree_iter_copy(&iter);
@@ -136,45 +157,216 @@ plan_lecheniya_update(GObject * delegate, cJSON * json){
 	plan_lecheniya_get_list(delegate, json);
 }
 
-static void 
-plan_lecheniya_row_activated(
-		GtkTreeView *treeview, 
-		GtkTreePath *path, 
-		GtkTreeViewColumn *col, 
-		gpointer userdata
+struct plan_lecheniya_tree_model_to_json {
+	cJSON *root;
+	cJSON *stage;
+	cJSON *array;
+	int parent;
+	int index;
+};
+
+static gboolean 
+plan_lecheniya_tree_model_to_json_cb(
+		GtkTreeModel* model, 
+		GtkTreePath* path, 
+		GtkTreeIter* iter, 
+		gpointer data) 
+{
+	struct plan_lecheniya_tree_model_to_json *s = data;
+	PLANLECHENIYA_TYPE type;
+	gtk_tree_model_get(model, iter, PLAN_LECHENIYA_TYPE, &type, -1); 			
+	switch (type) {
+		case PLANLECHENIYA_TYPE_STAGE:
+			{
+				// create new json object
+				s->index = 0;
+				s->parent++;
+				cJSON *stage = cJSON_CreateObject();
+				s->stage = stage;
+				cJSON_AddItemToArray(s->root, stage);
+				cJSON *array = cJSON_CreateArray();
+				s->array = array;
+				cJSON_AddItemToObject(stage, "array", array);
+				break;
+			}
+		case PLANLECHENIYA_TYPE_ITEM:
+			{
+				// add item to stage
+				cJSON *item = cJSON_CreateObject();
+				{
+					char str[32];
+					sprintf(str, "%d", s->index++);
+					cJSON_AddItemToObject(item, "childIndex", cJSON_CreateString(str));
+				}
+
+				{
+					char str[32];
+					sprintf(str, "%d", s->index);
+					cJSON_AddItemToObject(item, "number", cJSON_CreateString(str));
+				}
+				{
+					char str[32];
+					sprintf(str, "%d", s->parent);
+					cJSON_AddItemToObject(item, "parentIndex", cJSON_CreateString(str));
+				}
+
+				char *title = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_TITLE, &title, -1); 			
+				if (title)
+					cJSON_AddItemToObject(item, "title", cJSON_CreateString(title));
+					
+				cJSON_AddItemToObject(item, "isItem", cJSON_CreateString("1"));
+				
+				char *kod = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_TITLE, &kod, -1); 			
+				if (kod)
+					cJSON_AddItemToObject(item, "kod", cJSON_CreateString(kod));
+				
+				char *price = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_PRICE, &price, -1); 			
+				if (price)
+					cJSON_AddItemToObject(item, "price", cJSON_CreateString(price));
+				
+				char *count = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_COUNT, &count, -1); 			
+				if (count)
+					cJSON_AddItemToObject(item, "count", cJSON_CreateString(count));
+				
+				char *total = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_TOTAL, &total, -1); 			
+				if (total)
+					cJSON_AddItemToObject(item, "total", cJSON_CreateString(total));
+				
+				cJSON_AddItemToArray(s->array, item);
+				break;
+			}
+		case PLANLECHENIYA_TYPE_STAGE_DURATION:
+			{
+				// add time to stage
+				char *time = NULL;
+				gtk_tree_model_get(model, iter, PLAN_LECHENIYA_COLUMN_COUNT, &time, -1); 			
+				if (time)
+					cJSON_AddItemToObject(s->stage, "time", cJSON_CreateString(time));
+				break;
+			}
+	
+		default:
+			break;
+	}
+	
+	return FALSE;
+}
+
+static void
+plan_lecheniya_tree_model_to_json(
+			GtkTreeStore *store,
+			prozubi_t *p,
+			struct case_t *c
 		)
 {
-	g_print("Row activated\n");
-	//GObject *delegate = userdata;	
-	
-	//prozubi_t *p = g_object_get_data(G_OBJECT(treeview), "prozubi");
+	cJSON *json = cJSON_CreateArray();
+	struct plan_lecheniya_tree_model_to_json s = {json, NULL, NULL, 0, -1};
+	gtk_tree_model_foreach (GTK_TREE_MODEL(store), 
+			plan_lecheniya_tree_model_to_json_cb, &s);
 
-	//GtkTreeModel *model = gtk_tree_view_get_model(treeview);
-	//GtkTreeIter iter;
+	g_print("JSON: %s\n", cJSON_Print(json));
+	prozubi_case_set_CASEPLANLECHENIYA(p, c, json, 0);
+}
 
-	//if (gtk_tree_model_get_iter(model, &iter, path)) {
-		//[> expand/collapse row <]
-		//if (gtk_tree_model_iter_has_child(model, &iter)){
-			//if(gtk_tree_view_row_expanded(treeview, path))
-				//gtk_tree_view_collapse_row(treeview, path);
-			//else
-				//gtk_tree_view_expand_row(treeview, path, FALSE);
-			//return;
-		//}		
-		//CASES key;
-		//PLAN_LECHENIYA_TYPE type;
-		//char **combobox_array;
-		//struct case_t *c;
+static void
+plan_lecheniya_set_price_total(
+		GtkTreeModel *model,
+		GtkTreeIter *iter,
+		int old_total,
+		int new_total
+		)
+{
+		//get stage_price iter
+		while (gtk_tree_model_iter_next(model, iter)){
+			
+			//get iter with type PLANLECHENIYA_TYPE_STAGE_PRICE
+			PLANLECHENIYA_TYPE type;
+			gtk_tree_model_get(model, iter, PLAN_LECHENIYA_TYPE, &type, -1); 			
+			if (type == PLANLECHENIYA_TYPE_STAGE_PRICE){
+				char *stage_total_str;
+				gtk_tree_model_get(model, 
+						iter, PLAN_LECHENIYA_COLUMN_TOTAL, &stage_total_str, -1); 			
+				
+				int stage_total = atoi(stage_total_str);
+				stage_total -= old_total;
+				stage_total += new_total;
 
-		//gtk_tree_model_get(model, &iter, 
-				//PLAN_LECHENIYA_POINTER, &c,
-				//PLAN_LECHENIYA_COLUMN_TYPE, &type,
-				//PLAN_LECHENIYA_COLUMN_COMBOBOX_ARRAY, &combobox_array,
-				//PLAN_LECHENIYA_COLUMN_KEY, &key, -1); 
+				char new_stage_total[32];
+				sprintf(new_stage_total, "%d", stage_total);
 
-		//[> todo: refresh casesEditWindow <]
-		//cases_edit_refresh(GTK_WIDGET(delegate), p, c, key, type, combobox_array);
-	//}
+				gtk_tree_store_set(GTK_TREE_STORE(model), 
+						iter, PLAN_LECHENIYA_COLUMN_TOTAL, new_stage_total, -1);				
+
+				break;
+			}
+		}
+		
+		//set plan_lecheniya total 
+		GtkTreeIter parent;
+		if (gtk_tree_model_iter_parent(model, &parent, iter)){
+			while (gtk_tree_model_iter_next(model, &parent)){
+				//get iter with type PLANLECHENIYA_TYPE_TOTAL_PRICE
+				PLANLECHENIYA_TYPE type;
+				gtk_tree_model_get(model, &parent, PLAN_LECHENIYA_TYPE, &type, -1); 			
+				if (type == PLANLECHENIYA_TYPE_TOTAL_PRICE){
+					char *total_price_str;
+					gtk_tree_model_get(model, 
+							&parent, PLAN_LECHENIYA_COLUMN_TOTAL, &total_price_str, -1); 			
+					
+					int total_price = atoi(total_price_str);
+					total_price -= old_total;
+					total_price += new_total;
+
+					char new_stage_total[32];
+					sprintf(new_stage_total, "%d", total_price);
+
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+							&parent, PLAN_LECHENIYA_COLUMN_TOTAL, new_stage_total, -1);				
+
+					break;
+				}
+		}
+	}
+}
+
+static void
+plan_lecheniya_set_duration_total(
+		GtkTreeModel *model,
+		GtkTreeIter *iter,
+		int old_duration,
+		int new_duration
+		)
+{
+		GtkTreeIter parent;
+		if (gtk_tree_model_iter_parent(model, &parent, iter)){
+			while (gtk_tree_model_iter_next(model, &parent)){
+				//get iter with type PLANLECHENIYA_TYPE_TOTAL_DURATION
+				PLANLECHENIYA_TYPE type;
+				gtk_tree_model_get(model, &parent, PLAN_LECHENIYA_TYPE, &type, -1); 			
+				if (type == PLANLECHENIYA_TYPE_TOTAL_DURATION){
+					char *total_duration_str;
+					gtk_tree_model_get(model, 
+							&parent, PLAN_LECHENIYA_COLUMN_COUNT, &total_duration_str, -1); 			
+					
+					int total_duration = atoi(total_duration_str);
+					total_duration -= old_duration;
+					total_duration += new_duration;
+
+					char new_total[32];
+					sprintf(new_total, "%d", total_duration);
+
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+							&parent, PLAN_LECHENIYA_COLUMN_COUNT, new_total, -1);				
+
+					break;
+				}
+		}
+	}
 }
 
 static void 
@@ -242,63 +434,65 @@ plan_lecheniya_ask_to_remove_responce(
 		gpointer userdata
 		)
 {
-	//if (responce == GTK_RESPONSE_DELETE_EVENT) {
-		//g_print("Remove commited\n");
-
-		//GObject *delegate = userdata;
-		//struct case_t * c =  g_object_get_data(delegate, "casesToRemove"); 
+	if (responce == GTK_RESPONSE_DELETE_EVENT) {
+		g_print("Remove commited\n");
+	
+		GObject *delegate = userdata;
+		GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");
+		gchar *path = g_object_get_data(delegate, "toRemove");
 		//prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 		//char * patientid =  g_object_get_data(delegate, "patientid"); 
-		
-		//if (!c){
-			//g_print("cases is NULL\n");
-			//[>gtk_window_destroy(GTK_WINDOW(dialog));<]
-			//gtk_widget_destroy(GTK_WIDGET(dialog));
-			//return;
-		//}		
 
-		//[> remove cases and update table <]
-		//prozubi_case_remove(p, c);
-		//plan_lecheniya_update(delegate, p, patientid);
-	//}
-	//[>gtk_window_destroy(GTK_WINDOW(dialog));<]
-	//gtk_widget_destroy(GTK_WIDGET(dialog));
+		GtkTreeIter iter;
+		gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store),
+					&iter, path);
+
+		//update prices
+		char *total;
+		gtk_tree_model_get(GTK_TREE_MODEL(store), 
+				&iter, PLAN_LECHENIYA_COLUMN_TOTAL, &total, -1); 			
+		plan_lecheniya_set_price_total(GTK_TREE_MODEL(store), 
+				&iter, atoi(total), 0);
+		
+		gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store),
+					&iter, path);
+		gtk_tree_store_remove(store,  &iter);
+	}
+	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 static void 
-plan_lecheniya_ask_to_remove(GObject *delegate, struct case_t * c) {
-	//if (!c){
-		//g_print("cases is NULL\n");
-		//return;
-	//}
+plan_lecheniya_ask_to_remove(GObject *delegate, gchar *path) {
 
-	//g_object_set_data(delegate, "casesToRemove", c);
+	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");
+	g_object_set_data(delegate, "toRemove", path);
 	
-	//cJSON *json = c->case_list;
-	//cJSON *title = cJSON_GetObjectItem(json, "parent");
-	//char *t = cJSON_GetStringValue(title);
+	GtkTreeIter iter;
+	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store),
+			&iter, path);
+	char *title;
+	gtk_tree_model_get(GTK_TREE_MODEL(store), 
+			&iter, PLAN_LECHENIYA_COLUMN_TITLE, &title, -1); 			
 	
 	//GtkWidget * mainWindow = GTK_WIDGET(delegate); 
-	//GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(mainWindow),
-			//GTK_DIALOG_MODAL,
-			//GTK_MESSAGE_QUESTION,
-			//GTK_BUTTONS_NONE,
-			//"Удалить из базы: %s?", t);
-	//gtk_window_set_title(GTK_WINDOW(dialog), "Удалить?");
+	GtkWidget *dialog = gtk_message_dialog_new(NULL,
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_NONE,
+			"Удалить из базы: %s?", title);
+	gtk_window_set_title(GTK_WINDOW(dialog), "Удалить?");
 
-	////add remove button
-	//GtkWidget *button = gtk_button_new_with_label("УДАЛИТЬ");
-	////GtkStyleContext *context = gtk_widget_get_style_context(button);
-	////gtk_style_context_add_class(context, "destructive-action");
-	//gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
+	//add remove button
+	GtkWidget *button = gtk_button_new_with_label("УДАЛИТЬ");
+	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
 	
-	////add cancel button
-	//gtk_dialog_add_button(GTK_DIALOG(dialog), "Отмена", GTK_RESPONSE_CANCEL);
-	//gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
-	//g_signal_connect (dialog, "response", 
-			//G_CALLBACK (plan_lecheniya_ask_to_remove_responce), delegate);
+	//add cancel button
+	gtk_dialog_add_button(GTK_DIALOG(dialog), "Отмена", GTK_RESPONSE_CANCEL);
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_CANCEL);
+	g_signal_connect (dialog, "response", 
+			G_CALLBACK (plan_lecheniya_ask_to_remove_responce), delegate);
 
-	//gtk_widget_show_all(dialog);
+	gtk_widget_show_all(dialog);
 }
 
 static void
@@ -355,7 +549,6 @@ plan_lecheniya_remove_clicked(gpointer user_data){
 		//}
 	//}
 }
-
 static void 
 plan_lecheniya_table_cell_edited_callback (
 		GtkCellRendererText *cell, 
@@ -377,14 +570,14 @@ plan_lecheniya_table_cell_edited_callback (
 
 	// we need to use GtkListStore, because GtkTreeModel does not
 	//  provide an interface for cell changing.
-	GtkListStore *model;   
+	GtkTreeStore *model;   
 	GtkTreeIter iter_rawModel;
 
 	// check if we're working on the raw model or on a sorted version
 	//  of it
-	if(GTK_IS_LIST_STORE(treeModel)){
+	if(GTK_IS_TREE_STORE(treeModel)){
 		// just use the model as is    
-		model = GTK_LIST_STORE(treeModel);
+		model = GTK_TREE_STORE(treeModel);
 
 		// retrieve the iterator for the cell, that should be changed
 		gtk_tree_model_get_iter_from_string((GtkTreeModel*)model, &iter_rawModel, path_string);
@@ -392,7 +585,7 @@ plan_lecheniya_table_cell_edited_callback (
 	} else { // we're working on a sorted model   
 		// We need to change to a usual model.
 		GtkTreeModelSort *sortedModel = GTK_TREE_MODEL_SORT(treeModel);
-		model = GTK_LIST_STORE(gtk_tree_model_sort_get_model(sortedModel));
+		model = GTK_TREE_STORE(gtk_tree_model_sort_get_model(sortedModel));
 
 		// get the iterator within the sorted model
 		GtkTreeIter iter_sortedModel;
@@ -401,44 +594,203 @@ plan_lecheniya_table_cell_edited_callback (
 		// convert the iterator to one of the raw model.
 		// (Otherwise the wrong cell will change)
 		gtk_tree_model_sort_convert_iter_to_child_iter(sortedModel, &iter_rawModel, &iter_sortedModel);
-    }
+  }
+		
+		//get old value
+		char *old_value;
+		gtk_tree_model_get(GTK_TREE_MODEL(model), 
+					&iter_rawModel, column_number, &old_value, -1); 			
 
-	//struct passport_t * c;
-	//gtk_tree_model_get(treeModel, &iter_rawModel, PATIENT_LIST_POINTER, &c, -1); 			
-	//prozubi_t *p = g_object_get_data(G_OBJECT(cell), "prozubi");
+		switch (column_number) {
+			case PLAN_LECHENIYA_COLUMN_PRICE:
+				{
+					// filter numbers only
+					int price;
+					sscanf(new_text, "%d", &price);
+					char price_str[32];
+					sprintf(price_str, "%d", price);
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, column_number, price_str, -1);				
+					
+					// set total price
+					char *count_str;
+					gtk_tree_model_get(GTK_TREE_MODEL(model), 
+								&iter_rawModel, PLAN_LECHENIYA_COLUMN_COUNT, &count_str, -1); 			
+					int total = price * atoi(count_str);
+					char total_str[32];
+					sprintf(total_str, "%d", total);
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, PLAN_LECHENIYA_COLUMN_TOTAL, total_str, -1);				
 
-	//if (!c || !p)
-		//return;
-	
-	//switch (column_number) {
-		//case PATIENT_LIST_COLUMN_COMMENT:
-			//{
-				//if (!prozubi_passport_set_PASSPORTCOMMENT(p, c, new_text, true))
-					//gtk_list_store_set(GTK_LIST_STORE(model), &iter_rawModel, column_number, new_text, -1);				
-				//break;
-			//}			
-		//default: break;
-	//}
+					plan_lecheniya_set_price_total(GTK_TREE_MODEL(model), 
+							&iter_rawModel, atoi(old_value) * atoi(count_str), total);
+
+					break;
+				}			
+
+			case PLAN_LECHENIYA_COLUMN_COUNT:
+				{
+					// filter numbers only
+					int count;
+					sscanf(new_text, "%d", &count);
+					char count_str[32];
+					sprintf(count_str, "%d", count);
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, column_number, count_str, -1);				
+
+					// check type
+					PLANLECHENIYA_TYPE type;
+					gtk_tree_model_get(GTK_TREE_MODEL(model), 
+								&iter_rawModel, PLAN_LECHENIYA_TYPE, &type, -1); 			
+					if (type == PLANLECHENIYA_TYPE_STAGE_DURATION){
+						int duration;
+						sscanf(new_text, "%d", &duration);
+						char duration_str[32];
+						sprintf(duration_str, "%d", duration);
+						gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, column_number, duration_str, -1);				
+
+						plan_lecheniya_set_duration_total(GTK_TREE_MODEL(model), 
+								&iter_rawModel, atoi(old_value), duration);
+						break;
+					}
+
+					// set total price
+					char *price_str;
+					gtk_tree_model_get(GTK_TREE_MODEL(model), 
+								&iter_rawModel, PLAN_LECHENIYA_COLUMN_PRICE, &price_str, -1); 			
+					int total = count * atoi(price_str);
+					char total_str[32];
+					sprintf(total_str, "%d", total);
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, PLAN_LECHENIYA_COLUMN_TOTAL, total_str, -1);				
+
+					plan_lecheniya_set_price_total(GTK_TREE_MODEL(model), 
+							&iter_rawModel, atoi(old_value) * atoi(price_str), total);
+					
+					break;
+				}
+			case PLAN_LECHENIYA_COLUMN_TITLE:
+				{
+					gtk_tree_store_set(GTK_TREE_STORE(model), 
+								&iter_rawModel, column_number, new_text, -1);				
+				}
+		default: break;
+		}
+
+		// save json
+		prozubi_t *p = g_object_get_data(delegate, "prozubi");
+		struct case_t *c = g_object_get_data(delegate, "case");
+		plan_lecheniya_tree_model_to_json(model, p, c);
 }
 
+static void 
+plan_lecheniya_row_activated(
+		GtkTreeView *treeview, 
+		GtkTreePath *path, 
+		GtkTreeViewColumn *col, 
+		gpointer userdata
+		)
+{
+	g_print("Row activated\n");
+	GObject *delegate = userdata;	
+	
+	prozubi_t *p = g_object_get_data(delegate, "prozubi");
+  struct case_t *c = g_object_get_data(delegate, "case");
+  gint column_number = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(col), "column_number"));
+	g_print("Column: %d\n", column_number);
+
+	GtkTreeModel *treeModel = gtk_tree_view_get_model(treeview);
+	
+	GtkTreeStore *model;   
+	GtkTreeIter iter_rawModel;
+	if(GTK_IS_TREE_STORE(treeModel)){
+		// just use the model as is    
+		model = GTK_TREE_STORE(treeModel);
+
+		// retrieve the iterator for the cell, that should be changed
+		gtk_tree_model_get_iter_from_string((GtkTreeModel*)model, &iter_rawModel, 
+				gtk_tree_path_to_string(path));
+
+	} else { // we're working on a sorted model   
+		// We need to change to a usual model.
+		GtkTreeModelSort *sortedModel = GTK_TREE_MODEL_SORT(treeModel);
+		model = GTK_TREE_STORE(gtk_tree_model_sort_get_model(sortedModel));
+
+		// get the iterator within the sorted model
+		GtkTreeIter iter_sortedModel;
+		gtk_tree_model_get_iter_from_string((GtkTreeModel*)sortedModel, &iter_sortedModel, 
+				gtk_tree_path_to_string(path));
+
+		// convert the iterator to one of the raw model.
+		// (Otherwise the wrong cell will change)
+		gtk_tree_model_sort_convert_iter_to_child_iter(sortedModel, &iter_rawModel, &iter_sortedModel);
+  }
+		
+		//get type
+		PLANLECHENIYA_TYPE type;
+		gtk_tree_model_get(GTK_TREE_MODEL(model), 
+				&iter_rawModel, PLAN_LECHENIYA_TYPE, &type, -1); 			
+		
+		//get column number
+		if (column_number == PLAN_LECHENIYA_COLUMN_BUTTON){
+			if (type == PLANLECHENIYA_TYPE_ITEM){
+				//ask for remove row
+				plan_lecheniya_ask_to_remove(delegate, gtk_tree_path_to_string(path));
+			}
+		}
+}
 
 static GtkWidget *
-plan_lecheniya_new(GtkWidget *parent, cJSON *json){
-	/* set delegate */
-	GObject *delegate = G_OBJECT(parent);
+plan_lecheniya_new(
+		GtkWidget *parent, 
+		GObject *delegate,
+		cJSON *json,
+		prozubi_t *p,
+		struct case_t *c
+		)
+{
+	// vertical box
+	GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(parent), vbox);
+	gtk_widget_show(vbox);
+	
+	// toolbar
+	GtkWidget *toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
+	gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
+	gtk_widget_show(toolbar);
+
+	//toolbar buttons
+	GtkToolItem *add = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_ADD);
+	gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(add));
+	gtk_widget_show(GTK_WIDGET(add));
+
+	GtkToolItem *del = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_REMOVE);
+	gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(del));
+	gtk_widget_show(GTK_WIDGET(del));
+	
+	GtkToolItem *print = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_PRINT);
+	gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(print));
+	gtk_widget_show(GTK_WIDGET(print));
+
+	//scrolled vindow
+	GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), 
+			GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_box_pack_end(GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
+	gtk_widget_show(scrolled);
 
 	/* get treeView */
 	GtkWidget *treeView = gtk_tree_view_new();
-	if (!treeView){
-		g_print("Error! Can't create treeView\n");
-		return NULL;
-	}
 	g_object_set_data(delegate, "treeView", treeView);
 
 	/* create new model */
 	GtkTreeStore *store = plan_lecheniya_table_model_new();
 	g_object_set_data(delegate, "planLecheniyaStore", store);
-	//g_object_set_data(delegate, "prozubi", p);
+	g_object_set_data(delegate, "prozubi", p);
+	g_object_set_data(delegate, "case", c);
 
 	plan_lecheniya_update(delegate, json);
 
@@ -487,11 +839,12 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 					column = gtk_tree_view_column_new_with_attributes(
 							column_titles[i], renderer, 
 							"text", i,
-							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"editable", PLAN_LECHENIYA_IS_TITLE_PRICE_EDITABLE,
 							"style", PLAN_LECHENIYA_PANGO_STYLE,
 							NULL);
 					g_object_set(column, "expand", TRUE, NULL);	
 					g_object_set(column, "resizable", TRUE, NULL);	
+					g_object_set_data(G_OBJECT(column), "column_number", GUINT_TO_POINTER(i));
 					break;
 				}			
 			case PLAN_LECHENIYA_COLUMN_COUNT:
@@ -511,10 +864,11 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 					column = gtk_tree_view_column_new_with_attributes(
 							column_titles[i], renderer, 
 							"text", i, 
-							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"editable", PLAN_LECHENIYA_IS_COUNT_EDITABLE,
 							"style", PLAN_LECHENIYA_PANGO_STYLE,
 							NULL);
 					g_object_set(column, "resizable", TRUE, NULL);	
+					g_object_set_data(G_OBJECT(column), "column_number", GUINT_TO_POINTER(i));
 					break;
 				}
 			case PLAN_LECHENIYA_COLUMN_PRICE:
@@ -531,10 +885,11 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 					column = gtk_tree_view_column_new_with_attributes(
 							column_titles[i], renderer, 
 							"text", i, 
-							"editable", PLAN_LECHENIYA_IS_EDITABLE,
+							"editable", PLAN_LECHENIYA_IS_TITLE_PRICE_EDITABLE,
 							"style", PLAN_LECHENIYA_PANGO_STYLE,
 							NULL);
 					g_object_set(column, "resizable", TRUE, NULL);	
+					g_object_set_data(G_OBJECT(column), "column_number", GUINT_TO_POINTER(i));
 					break;
 				}
 			case PLAN_LECHENIYA_COLUMN_TOTAL:
@@ -547,13 +902,17 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 					column = gtk_tree_view_column_new_with_attributes(
 							column_titles[i], renderer, "text", i,  NULL);
 					g_object_set(column, "resizable", TRUE, NULL);	
+					g_object_set_data(G_OBJECT(column), "column_number", GUINT_TO_POINTER(i));
 					break;
 				}
-				case PLAN_LECHENIYA_COLUMN_REMOVE:
+				case PLAN_LECHENIYA_COLUMN_BUTTON:
 				{
-					column = gtk_tree_view_column_new();
-					gtk_tree_view_column_set_title(column, column_titles[i]);
-					g_object_set(column, "resizable", TRUE, NULL);	
+					GtkCellRenderer	*renderer = gtk_cell_renderer_pixbuf_new();
+					column = gtk_tree_view_column_new_with_attributes(
+							column_titles[i], renderer, "stock-id", i,  NULL);
+					g_object_set(column, "resizable", FALSE, NULL);	
+					g_object_set_data(G_OBJECT(column), "column_number", GUINT_TO_POINTER(i));
+					
 					break;
 				}
 				
@@ -564,8 +923,7 @@ plan_lecheniya_new(GtkWidget *parent, cJSON *json){
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
 
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(parent), treeView);	
-	/*gtk_container_add(GTK_CONTAINER(parent), treeView);*/
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled), treeView);	
 
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(treeView));
 	gtk_widget_show(treeView);

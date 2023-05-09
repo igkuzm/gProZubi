@@ -350,24 +350,9 @@ create_casesWindow (void)
   GtkWidget *caseRefreshButton;
   GtkWidget *casesListView;
   GtkWidget *casesListInfo;
-  GtkWidget *vbox4;
-  GtkWidget *menubar2;
-  GtkWidget *menuitem9;
-  GtkWidget *menuitem9_menu;
-  GtkWidget *casesWindowMenuCut;
-  GtkWidget *casesWindowMenuCopy;
-  GtkWidget *casesWindowMenuPaste;
-  GtkWidget *casesWindowMenuDelete;
-  GtkWidget *casesWindowShare;
-  GtkWidget *casesWindowLoad;
-  GtkWidget *casesWindowDocs;
-  GtkWidget *casesWindowAdd;
-  GtkWidget *casesWindowDelete;
-  GtkWidget *casesWindowPrint;
-  GtkWidget *casesEditWindow;
-  GtkAccelGroup *accel_group;
-
-  accel_group = gtk_accel_group_new ();
+  GtkWidget *casesEditFrame;
+  GtkWidget *alignment1;
+  GtkWidget *label12;
 
   casesWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (casesWindow, 640, 480);
@@ -378,7 +363,6 @@ create_casesWindow (void)
   casesPaned = gtk_hpaned_new ();
   gtk_widget_show (casesPaned);
   gtk_container_add (GTK_CONTAINER (casesWindow), casesPaned);
-  gtk_paned_set_position (GTK_PANED (casesPaned), 0);
 
   casesWindowLeftBox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (casesWindowLeftBox);
@@ -398,7 +382,7 @@ create_casesWindow (void)
   gtk_widget_show (caseRemoveButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
 
-  caseRefreshButton = (GtkWidget*) gtk_tool_button_new (NULL, "");
+  caseRefreshButton = (GtkWidget*) gtk_tool_button_new (NULL, _("ref"));
   gtk_widget_show (caseRefreshButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRefreshButton);
 
@@ -411,65 +395,21 @@ create_casesWindow (void)
   gtk_widget_show (casesListInfo);
   gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListInfo, FALSE, FALSE, 0);
 
-  vbox4 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox4);
-  gtk_paned_pack2 (GTK_PANED (casesPaned), vbox4, TRUE, TRUE);
+  casesEditFrame = gtk_frame_new (NULL);
+  gtk_widget_show (casesEditFrame);
+  gtk_paned_pack2 (GTK_PANED (casesPaned), casesEditFrame, TRUE, TRUE);
+  gtk_frame_set_label_align (GTK_FRAME (casesEditFrame), 0, 0);
+  gtk_frame_set_shadow_type (GTK_FRAME (casesEditFrame), GTK_SHADOW_NONE);
 
-  menubar2 = gtk_menu_bar_new ();
-  gtk_widget_show (menubar2);
-  gtk_box_pack_start (GTK_BOX (vbox4), menubar2, FALSE, FALSE, 0);
+  alignment1 = gtk_alignment_new (0.5, 0.5, 1, 1);
+  gtk_widget_show (alignment1);
+  gtk_container_add (GTK_CONTAINER (casesEditFrame), alignment1);
+  gtk_alignment_set_padding (GTK_ALIGNMENT (alignment1), 0, 0, 12, 0);
 
-  menuitem9 = gtk_menu_item_new_with_mnemonic (_("\320\237\321\200\320\260\320\262\320\272\320\260"));
-  gtk_widget_show (menuitem9);
-  gtk_container_add (GTK_CONTAINER (menubar2), menuitem9);
-
-  menuitem9_menu = gtk_menu_new ();
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem9), menuitem9_menu);
-
-  casesWindowMenuCut = gtk_image_menu_item_new_from_stock ("gtk-cut", accel_group);
-  gtk_widget_show (casesWindowMenuCut);
-  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuCut);
-
-  casesWindowMenuCopy = gtk_image_menu_item_new_from_stock ("gtk-copy", accel_group);
-  gtk_widget_show (casesWindowMenuCopy);
-  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuCopy);
-
-  casesWindowMenuPaste = gtk_image_menu_item_new_from_stock ("gtk-paste", accel_group);
-  gtk_widget_show (casesWindowMenuPaste);
-  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuPaste);
-
-  casesWindowMenuDelete = gtk_image_menu_item_new_from_stock ("gtk-delete", accel_group);
-  gtk_widget_show (casesWindowMenuDelete);
-  gtk_container_add (GTK_CONTAINER (menuitem9_menu), casesWindowMenuDelete);
-
-  casesWindowShare = gtk_menu_item_new_with_mnemonic (_("share"));
-  gtk_widget_show (casesWindowShare);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowShare);
-
-  casesWindowLoad = gtk_menu_item_new_with_mnemonic (_("load"));
-  gtk_widget_show (casesWindowLoad);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowLoad);
-
-  casesWindowDocs = gtk_menu_item_new_with_mnemonic (_("docs"));
-  gtk_widget_show (casesWindowDocs);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowDocs);
-
-  casesWindowAdd = gtk_menu_item_new_with_mnemonic (_("add"));
-  gtk_widget_show (casesWindowAdd);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowAdd);
-
-  casesWindowDelete = gtk_menu_item_new_with_mnemonic (_("delete"));
-  gtk_widget_show (casesWindowDelete);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowDelete);
-
-  casesWindowPrint = gtk_menu_item_new_with_mnemonic (_("print"));
-  gtk_widget_show (casesWindowPrint);
-  gtk_container_add (GTK_CONTAINER (menubar2), casesWindowPrint);
-
-  casesEditWindow = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (casesEditWindow);
-  gtk_box_pack_start (GTK_BOX (vbox4), casesEditWindow, TRUE, TRUE, 0);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (casesEditWindow), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  label12 = gtk_label_new (_("<b>frame1</b>"));
+  gtk_widget_show (label12);
+  gtk_frame_set_label_widget (GTK_FRAME (casesEditFrame), label12);
+  gtk_label_set_use_markup (GTK_LABEL (label12), TRUE);
 
   g_signal_connect ((gpointer) casesWindow, "size_allocate",
                     G_CALLBACK (on_casesWindow_size_allocate),
@@ -486,36 +426,6 @@ create_casesWindow (void)
   g_signal_connect ((gpointer) caseRefreshButton, "clicked",
                     G_CALLBACK (on_caseRefreshButton_clicked),
                     NULL);
-  g_signal_connect ((gpointer) casesWindowMenuCut, "activate",
-                    G_CALLBACK (on_casesWindowMenuCut_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowMenuCopy, "activate",
-                    G_CALLBACK (on_casesWindowMenuCut_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowMenuPaste, "activate",
-                    G_CALLBACK (on_casesWindowMenuPaste_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowMenuDelete, "activate",
-                    G_CALLBACK (on_casesWindowMenuDelete_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowShare, "activate",
-                    G_CALLBACK (on_casesWindowShare_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowLoad, "activate",
-                    G_CALLBACK (on_casesWindowLoad_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowDocs, "activate",
-                    G_CALLBACK (on_casesWindowDocs_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowAdd, "activate",
-                    G_CALLBACK (on_casesWindowAdd_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowDelete, "activate",
-                    G_CALLBACK (on_casesWindowDelete_activate),
-                    NULL);
-  g_signal_connect ((gpointer) casesWindowPrint, "activate",
-                    G_CALLBACK (on_casesWindowPrint_activate),
-                    NULL);
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
   GLADE_HOOKUP_OBJECT_NO_REF (casesWindow, casesWindow, "casesWindow");
@@ -527,23 +437,9 @@ create_casesWindow (void)
   GLADE_HOOKUP_OBJECT (casesWindow, caseRefreshButton, "caseRefreshButton");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListView, "casesListView");
   GLADE_HOOKUP_OBJECT (casesWindow, casesListInfo, "casesListInfo");
-  GLADE_HOOKUP_OBJECT (casesWindow, vbox4, "vbox4");
-  GLADE_HOOKUP_OBJECT (casesWindow, menubar2, "menubar2");
-  GLADE_HOOKUP_OBJECT (casesWindow, menuitem9, "menuitem9");
-  GLADE_HOOKUP_OBJECT (casesWindow, menuitem9_menu, "menuitem9_menu");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuCut, "casesWindowMenuCut");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuCopy, "casesWindowMenuCopy");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuPaste, "casesWindowMenuPaste");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowMenuDelete, "casesWindowMenuDelete");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowShare, "casesWindowShare");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowLoad, "casesWindowLoad");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowDocs, "casesWindowDocs");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowAdd, "casesWindowAdd");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowDelete, "casesWindowDelete");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesWindowPrint, "casesWindowPrint");
-  GLADE_HOOKUP_OBJECT (casesWindow, casesEditWindow, "casesEditWindow");
-
-  gtk_window_add_accel_group (GTK_WINDOW (casesWindow), accel_group);
+  GLADE_HOOKUP_OBJECT (casesWindow, casesEditFrame, "casesEditFrame");
+  GLADE_HOOKUP_OBJECT (casesWindow, alignment1, "alignment1");
+  GLADE_HOOKUP_OBJECT (casesWindow, label12, "label12");
 
   return casesWindow;
 }

@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 07.05.2023
+ * Last Modified Date: 09.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -409,22 +409,48 @@ cases_edit_refresh(
 	GObject *delegate = G_OBJECT(casesWindow);
 	
 	/* get casesEditWindow */
-	GtkWidget * casesEditWindow = lookup_widget(casesWindow, "casesEditWindow");
-	if (!casesEditWindow){
-		g_print("Error! Can't find casesEditWindow\n");
+	GtkWidget * casesEditFrame = lookup_widget(casesWindow, "casesEditFrame");
+	if (!casesEditFrame){
+		g_print("Error! Can't find casesEditFrame\n");
 		return NULL;
 	}	
 
 	/* get and remove child */
-	GtkWidget *child = gtk_bin_get_child(GTK_BIN(casesEditWindow));
+	GtkWidget *child = gtk_bin_get_child(GTK_BIN(casesEditFrame));
 	if (child)
-		gtk_container_remove(GTK_CONTAINER (casesEditWindow), child);
+		gtk_container_remove(GTK_CONTAINER (casesEditFrame), child);
 
 	switch (type) {
 		case CASES_LIST_TYPE_TEXT:
 			{
+				// vertical box
+				GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+				gtk_container_add(GTK_CONTAINER(casesEditFrame), vbox);
+				gtk_widget_show(vbox);
+				
+				// toolbar
+				GtkWidget *toolbar = gtk_toolbar_new();
+				gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+				gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
+				gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
+				gtk_widget_show(toolbar);
+
+				//toolbar buttons
+				GtkToolItem *share = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_GO_UP);
+				gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(share));
+				gtk_widget_show(GTK_WIDGET(share));
+
+				//scrolled vindow
+				GtkWidget *scrolled = gtk_scrolled_window_new(NULL, NULL);
+				gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled), 
+						GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+				gtk_box_pack_end(GTK_BOX(vbox), scrolled, TRUE, TRUE, 0);
+				gtk_widget_show(scrolled);
+
+				// text edit
 				GtkWidget *textEdit = gtk_text_view_new();
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
+				gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textEdit), GTK_WRAP_WORD);
+				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled),
 						textEdit);
 				const char *value = prozubi_case_get(c, key);
 				GtkTextBuffer *buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textEdit));
@@ -445,8 +471,7 @@ cases_edit_refresh(
 			{
 				GtkWidget *bbox = gtk_vbutton_box_new();
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
-						bbox);
+				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);
 				
 				const char *value = prozubi_case_get(c, key);
@@ -475,8 +500,7 @@ cases_edit_refresh(
 			{
 				GtkWidget *bbox = gtk_vbutton_box_new();
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
-						bbox);
+				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);
 				
 				time_t *value = prozubi_case_get(c, key);
@@ -526,8 +550,7 @@ cases_edit_refresh(
 			{
 				GtkWidget *bbox = gtk_vbutton_box_new();
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesEditWindow),
-						bbox);
+				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);
 				
 				GtkWidget *event_box = gtk_event_box_new ();
@@ -554,8 +577,7 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_PLANLECHENIYA:
 			{
-				GtkWidget *pl = plan_lecheniya_new(casesEditWindow, c->planlecheniya);	
-
+				GtkWidget *pl = plan_lecheniya_new(casesEditFrame, delegate, c->planlecheniya, p, c);	
 				return pl;
 			}			
 
