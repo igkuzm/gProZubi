@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 02.05.2023
+ * Last Modified Date: 09.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -18,6 +18,7 @@
 
 #include "interface.h"
 #include "support.h"
+#include "getbundle.h"
 
 #include "prozubilib/prozubilib.h"
 
@@ -40,6 +41,65 @@ main (int argc, char *argv[])
 
   add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
 
+	/*load files from bundle */
+	
+	//get bundle directory
+	char *bundle = getbundle(argv);
+	if (!bundle){
+		g_error("can't get application bundle\n");
+		return 1;
+	}
+	
+	//crete directory in home dir
+	char workdir[BUFSIZ];
+	sprintf(workdir, "%s/%s", g_get_home_dir(), "gProZubi");
+	g_mkdir_with_parents(workdir, 0755);
+	
+	//for MacOS set gtk_pixbuf paths
+#ifdef __APPLE__
+	char * loaders_cache = STR("%s/gdk-pixbuf-loaders.cache", workdir); 
+	char * loaders_dir   = STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders", bundle); 
+	setenv("GDK_PIXBUF_MODULE_FILE", loaders_cache, true);
+	setenv("GDK_PIXBUF_MODULEDIR",   loaders_dir,   true);
+	setenv("GTK_PATH",        bundle, true);
+	setenv("GTK_DATA_PREFIX", bundle, true);
+	setenv("GTK_PATH",        bundle, true);
+	//fix loaders cache
+	fpstrrep(
+			STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in", bundle), 
+			loaders_cache, 
+			"$bundle", 
+			bundle
+			);
+#endif
+
+	//copy files from bundle
+	char *files[] = 
+	{
+		"MKBCodes.sqlite", 
+		"nomenklatura.sqlite", 
+		NULL
+	};
+	for (int i = 0; files[i]; ++i) {
+		GFile *sfile = g_file_new_build_filename(bundle,  files[i], NULL);
+		GFile *dfile = g_file_new_build_filename(workdir, files[i], NULL);
+		
+		GError *error = NULL;
+		g_file_copy(sfile, dfile, 0, NULL, NULL, NULL, &error);
+		if (error)
+			printf("g_file_copy error: %s\n", error->message);
+	}
+
+	//free bundle var
+	free(bundle);
+
+	//chworkdir
+	chdir(workdir);	
+
+	//get token
+	char * token = token_from_config();
+	g_print("init with token: %s\n", token);
+
   /*
    * The following code was added by Glade to create one of each component
    * (except popup menus), just so that you see something after building
@@ -53,8 +113,8 @@ main (int argc, char *argv[])
 
   /* init database */
   prozubi_t *p = prozubi_init(
-		  "/Users/kuzmich/Library/Containers/kuzm.ig.ProZubi/Data/Documents/ProZubi.sqlite",
-		  NULL);
+		  "ProZubi.sqlite",
+		  token);
 
   g_object_set_data(G_OBJECT(mainWindow), "prozubi", p);
 

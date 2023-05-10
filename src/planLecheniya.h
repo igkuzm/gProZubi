@@ -363,8 +363,12 @@ plan_lecheniya_add_stage(
 
 static void
 plan_lecheniya_add_item(
-		GtkWidget *sender,
-		GObject *delegate
+		GObject *delegate,
+		int index,
+		const char *title,
+		const char *kod,
+		int price,
+		int count
 		)
 {		
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");
@@ -372,7 +376,7 @@ plan_lecheniya_add_item(
 	struct case_t *c=  g_object_get_data(delegate, "case"); 
 
 	prozubi_planlecheniya_add_item(
-			c->planlecheniya, 0, "TEST", "K2002", 1000, 1
+			c->planlecheniya, index, title, kod, price, count
 			);
 	plan_lecheniya_update(delegate, c->planlecheniya);
 }
@@ -785,7 +789,10 @@ plan_lecheniya_row_activated(
 				plan_lecheniya_ask_to_remove(delegate, gtk_tree_path_to_string(path));
 			} else if (type == PLANLECHENIYA_TYPE_STAGE){
 				// add item to stage
-				plan_lecheniya_add_item(NULL, delegate);
+				// get index of stage
+				int index = atoi(gtk_tree_path_to_string(path));
+				g_print("Index of stage: %d\n", index);
+				/*plan_lecheniya_add_item(NULL, delegate);*/
 			}
 		}
 }
