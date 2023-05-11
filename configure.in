@@ -11,10 +11,26 @@ AM_PROG_CC_STDC
 AC_HEADER_STDC
 AC_PROG_CXX
 
-pkg_modules="gtk+-2.0 >= 2.0.0"
-PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
-AC_SUBST(PACKAGE_CFLAGS)
-AC_SUBST(PACKAGE_LIBS)
+LT_INIT
+
+AC_CANONICAL_HOST
+case "${host_os}" in
+	cygwin*|mingw*)
+	;;
+	darwin*)
+	;;
+	*)
+		webkit_modules="webkit2gtk-4.0"
+		PKG_CHECK_MODULES(WEBKIT, [$webkit_modules])
+		AC_SUBST(WEBKIT_CFLAGS)
+		AC_SUBST(WEBKIT_LIBS)
+	;;
+esac
+
+gtk2_modules="gtk+-2.0 >= 2.0.0"
+PKG_CHECK_MODULES(GTK2, [$gtk2_modules])
+AC_SUBST(GTK2_CFLAGS)
+AC_SUBST(GTK2_LIBS)
 
 GETTEXT_PACKAGE=gprozubi
 AC_SUBST(GETTEXT_PACKAGE)

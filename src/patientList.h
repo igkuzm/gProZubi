@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 06.05.2023
+ * Last Modified Date: 10.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -51,8 +51,9 @@ static GtkListStore
 static void 
 patient_list_store_add(GtkListStore *store, struct passport_t * patient){
 	
-	GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
-	gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
+	//GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
+	//gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
+	char *date_str = "";
 
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
@@ -67,9 +68,9 @@ patient_list_store_add(GtkListStore *store, struct passport_t * patient){
 			PATIENT_LIST_POINTER,            patient,
 	-1);
 
-	g_date_time_unref(d);
-	if (date_str)
-		free(date_str);
+	//g_date_time_unref(d);
+	//if (date_str)
+		//free(date_str);
 }
 
 static int 
