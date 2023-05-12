@@ -6,7 +6,7 @@ INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\"
 
-lib_LTLIBRARIES = libYDConnect.la
+#lib_LTLIBRARIES = libYDConnect.la
 libYDConnect_la_SOURCES = YDConnect.cc webview.h
 libYDConnect_la_CXXFLAGS = $(WEBKIT_CFLAGS)
 libYDConnect_la_LIBADD = $(WEBKIT_LIBS)

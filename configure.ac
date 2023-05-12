@@ -22,8 +22,8 @@ case "${host_os}" in
 	*)
 		webkit_modules="webkit2gtk-4.0"
 		PKG_CHECK_MODULES(WEBKIT, [$webkit_modules])
-#AC_SUBST(WEBKIT_CFLAGS)
-#AC_SUBST(WEBKIT_LIBS)
+		AC_SUBST(WEBKIT_CFLAGS)
+		AC_SUBST(WEBKIT_LIBS)
 	;;
 esac
 

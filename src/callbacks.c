@@ -22,6 +22,16 @@
 #include "doctorList.h"
 #include "configFile.h"
 
+void
+gprozubi_quit(GtkWidget *mainWindow){
+#if GTK_CHECK_VERSION(3, 0, 0)
+	GApplication *app = G_APPLICATION(g_object_get_data(G_OBJECT(mainWindow), "app"));
+	g_application_quit (app);
+#else
+	gtk_main_quit();
+#endif
+}
+
 void clear_columns(GtkWidget *mainWindow){
 	
 	GObject *delegate = G_OBJECT(mainWindow);
@@ -132,7 +142,7 @@ void
 on_removeButton_clicked                (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	patient_list_remove_clicked(toolbutton);
+	patient_list_remove_clicked(user_data);
 }
 
 
@@ -149,8 +159,7 @@ void
 on_patientEditSaveButton_clicked       (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget * patientEditWindow = user_data;
-	patient_edit_save_button_pushed(patientEditWindow);
+	patient_edit_save_button_pushed(user_data);
 }
 
 

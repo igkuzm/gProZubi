@@ -7,6 +7,8 @@
  */
 #include <gtk/gtk.h>
 
+void
+gprozubi_quit(GtkWidget *mainWindow);
 
 void
 on_patientListButton_activate          (GtkButton       *button,

@@ -49,8 +49,6 @@ static GtkListStore
 
 static void 
 patient_list_store_add(GtkListStore *store, struct passport_t * patient){
-	g_print("Add patient: %s\n", patient->familiya);
-	
 	GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
   gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
 
