@@ -1,3 +1,10 @@
+/**
+ * File              : callbacks.h
+ * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
+ * Date              : 12.05.2023
+ * Last Modified Date: 12.05.2023
+ * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
 #include <gtk/gtk.h>
 
 
@@ -104,34 +111,6 @@ on_removeButton_clicked                (GtkToolButton   *toolbutton,
                                         gpointer         user_data);
 
 void
-on_familiyaEntry_changed               (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_imiaEntry_changed                   (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_otchestvoEntry_changed              (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_emailEntry_changed                  (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_dateOfBirthEntry_changed            (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_telEntry_changed                    (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
-on_commentEntry_changed                (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
 on_patientEditCancelButton_clicked     (GtkButton       *button,
                                         gpointer         user_data);
 
@@ -160,47 +139,6 @@ on_dateOfBirthEntry_insert_text        (GtkEditable     *editable,
                                         gint             new_text_length,
                                         gpointer         position,
                                         gpointer         user_data);
-
-void
-on_______________1_activate            (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on___________________1_activate        (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on__________________________1_activate (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on___________1_activate                (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on_________________1_activate          (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on_____________________1_activate      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on______________________1_activate     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on_________________2_activate          (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on_____________________2_activate      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
-void
-on_______________2_activate            (GtkMenuItem     *menuitem,
-                                        gpointer         user_data);
-
 void
 on_mainWindowMenuCreate_activate       (GtkMenuItem     *menuitem,
                                         gpointer         user_data);

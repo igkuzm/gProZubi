@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 09.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,7 +11,6 @@
 
 #include <gtk/gtk.h>
 #include "prozubilib/cases.h"
-#include "support.h"
 #include "casesEdit.h"
 
 #include "prozubilib/prozubilib.h"
@@ -285,8 +284,7 @@ static void
 cases_list_remove_clicked(gpointer user_data){
 	
 	/* get mainWindow */
-	GtkWidget * casesWindow = 
-			lookup_widget(GTK_WIDGET(user_data), "casesWindow");
+	GtkWidget * casesWindow = user_data;
 	if (!casesWindow){
 		g_print("Error! Can't find casesWindow\n");
 		return;
@@ -343,7 +341,7 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	GObject *delegate = G_OBJECT(casesWindow);
 
 	/* get toolbar */
-	GtkWidget * toolbar = lookup_widget(casesWindow, "casesListToolbar");
+	GtkWidget * toolbar = g_object_get_data(delegate, "casesListToolbar");
 	if (!toolbar){
 		g_print("Error! Can't find casesListToolbar\n");
 		return NULL;
@@ -351,7 +349,7 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
 	/* get treeView */
-	GtkWidget * casesListView = lookup_widget(casesWindow, "casesListView");
+	GtkWidget * casesListView = g_object_get_data(delegate, "casesListView");
 	if (!casesListView){
 		g_print("Error! Can't find casesListView\n");
 		return NULL;
@@ -427,7 +425,11 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
 
+#if !GTK_CHECK_VERSION(3, 8, 0)
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(casesListView), treeView);	
+#else
+	gtk_container_add(GTK_CONTAINER(casesListView), treeView);
+#endif
 
 	gtk_widget_show(treeView);
 	return treeView;	

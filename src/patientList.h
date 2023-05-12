@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 10.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,7 +12,6 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
-#include "support.h"
 
 #include "casesList.h"
 #include "interface.h"
@@ -50,10 +49,10 @@ static GtkListStore
 
 static void 
 patient_list_store_add(GtkListStore *store, struct passport_t * patient){
+	g_print("Add patient: %s\n", patient->familiya);
 	
-	//GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
-	//gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
-	char *date_str = "";
+	GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
+  gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
 
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
@@ -68,9 +67,9 @@ patient_list_store_add(GtkListStore *store, struct passport_t * patient){
 			PATIENT_LIST_POINTER,            patient,
 	-1);
 
-	//g_date_time_unref(d);
-	//if (date_str)
-		//free(date_str);
+	g_date_time_unref(d);
+	if (date_str)
+		free(date_str);
 }
 
 static int 
@@ -101,9 +100,6 @@ patient_list_update(GObject * delegate, prozubi_t *p){
 
 	/* set remove button insensitive */
 	//gtk_widget_set_sensitive(GTK_WIDGET(g_object_get_data(delegate, "petientRemoveButton")), FALSE);		
-
-	/* set selected patient to NULL */
-	g_object_set_data(delegate, "selectedPatient", NULL);	
 
 	/* clear store */
 	gtk_tree_model_foreach (GTK_TREE_MODEL(store), 
@@ -156,11 +152,12 @@ patient_list_row_activated(
 			sprintf(title, "%s %s %s", patient->familiya, patient->imia, patient->otchestvo);
 			gtk_window_set_title(GTK_WINDOW(casesWindow), title);
 			widget_restore_state_from_config(casesWindow, "casesWindow", 640, 480); 
-			GtkWidget *casesWindowLeftBox = lookup_widget(casesWindow, "casesWindowLeftBox");
+			GtkWidget *casesWindowLeftBox = g_object_get_data(
+					G_OBJECT(casesWindow), "casesWindowLeftBox");
 			if (casesWindowLeftBox)
-				widget_restore_state_from_config(casesWindowLeftBox, "casesWindowLeftBox", 300, 480); 
+				widget_restore_state_from_config(
+						casesWindowLeftBox, "casesWindowLeftBox", 300, 480); 
 			
-
 			gtk_widget_show(casesWindow);
 
 			/* start cases list */
@@ -305,9 +302,9 @@ patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) {
 static void
 patient_list_remove_clicked(gpointer user_data){
 	
+	GtkWidget * mainWindow = user_data; 
+	
 	/* get mainWindow */
-	GtkWidget * mainWindow = 
-			lookup_widget(GTK_WIDGET(user_data), "mainWindow");
 	if (!mainWindow){
 		g_print("Error! Can't find mainWindow\n");
 		return;
@@ -415,25 +412,19 @@ static GtkWidget *
 patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
-	
-	GtkWidget * mainView = lookup_widget(mainWindow, "mainView");
-	if (!mainView){
-		g_print("Error! Can't find mainView\n");
-		return NULL;
-	}
 
+	GtkWidget *mainView = g_object_get_data(delegate, "mainView");
+	
 	GtkWidget * oldWidget = gtk_bin_get_child (GTK_BIN (mainView)); 
 	if (oldWidget)
 		gtk_container_remove (GTK_CONTAINER (mainView), oldWidget); 
 
 	/* get treeView */
-	//GtkWidget * treeView = lookup_widget(mainWindow, "mainTreeView");
 	GtkWidget * treeView = gtk_tree_view_new();
 	if (!treeView){
 		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
-
 	g_object_set_data(delegate, "mainTreeView", treeView);
 
 	/* create new model */
@@ -446,7 +437,7 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	//GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeView), GTK_TREE_MODEL(store));
 	
-	GtkWidget *search = lookup_widget(mainWindow, "searchEntry");
+	GtkWidget *search = g_object_get_data(delegate, "searchEntry");
 	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(treeView), GTK_ENTRY(search));
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeView), true);	
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(treeView), patient_list_SearchEqualFunc, NULL, NULL);
@@ -511,7 +502,11 @@ patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 										GINT_TO_POINTER(i));		
 	}
 
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mainView), treeView);
+#if !GTK_CHECK_VERSION(3, 8, 0)
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(mainView), treeView);	
+#else
+	gtk_container_add(GTK_CONTAINER(mainView), treeView);
+#endif
 
 	gtk_widget_show(treeView);
 	return treeView;	

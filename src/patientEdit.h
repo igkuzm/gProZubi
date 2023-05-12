@@ -2,7 +2,7 @@
  * File              : patientEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.05.2023
- * Last Modified Date: 05.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "glibconfig.h"
-#include "support.h"
 
 #include "casesList.h"
 #include "interface.h"
@@ -45,7 +44,7 @@ patient_edit_save_button_pushed(gpointer data){
 	GtkWidget *patientEditWindow = GTK_WIDGET(delegate);
 
 #define PATIENT_EDIT_TYPE_ENTRY(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return;\
@@ -56,7 +55,7 @@ patient_edit_save_button_pushed(gpointer data){
 	}
 
 #define PATIENT_EDIT_TYPE_EDATE(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return;\
@@ -76,18 +75,17 @@ patient_edit_save_button_pushed(gpointer data){
 	}
 	
 #define PATIENT_EDIT_TYPE_TEXTV(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return;\
 	}\
 	{\
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(name));\
 		GtkTextIter start, end;\
-		gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(GTK_TEXT_VIEW(name)->buffer),\
-			   	&start, &end);\
+		gtk_text_buffer_get_bounds(buffer, &start, &end);\
 		const char *text = \
-				gtk_text_buffer_get_text(GTK_TEXT_BUFFER(GTK_TEXT_VIEW(name)->buffer),\
-					   	&start, &end, FALSE);\
+				gtk_text_buffer_get_text(buffer, &start, &end, FALSE);\
 		prozubi_passport_set_text(key, p, patient, text, true);\
 	}
 
@@ -133,9 +131,8 @@ patient_edit_new(
 	g_object_set_data(delegate, "mainWindow", mainWindow);
 	g_object_set_data(delegate, "isNew", GINT_TO_POINTER(isNew));
 
-
 #define PATIENT_EDIT_TYPE_ENTRY(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return NULL;\
@@ -143,7 +140,7 @@ patient_edit_new(
 	gtk_entry_set_text(GTK_ENTRY(name), patient->member);
 
 #define PATIENT_EDIT_TYPE_EDATE(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return NULL;\
@@ -161,13 +158,15 @@ patient_edit_new(
 	}
 
 #define PATIENT_EDIT_TYPE_TEXTV(member, name, key)\
-	GtkWidget * name = lookup_widget(patientEditWindow, #name);\
+	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
 		return NULL;\
 	}\
-	gtk_text_buffer_set_text(GTK_TEXT_BUFFER(GTK_TEXT_VIEW(name)->buffer),\
-			patient->member, -1);
+	{\
+		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(name));\
+		gtk_text_buffer_set_text(buffer, patient->member, -1);\
+	}
 
 PATIENT_EDIT_TYPES
 

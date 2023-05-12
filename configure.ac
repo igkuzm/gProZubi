@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(configure.in)
+AC_INIT(configure.ac)
 AM_INIT_AUTOMAKE(gprozubi, 0.1)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
@@ -22,15 +22,16 @@ case "${host_os}" in
 	*)
 		webkit_modules="webkit2gtk-4.0"
 		PKG_CHECK_MODULES(WEBKIT, [$webkit_modules])
-		AC_SUBST(WEBKIT_CFLAGS)
-		AC_SUBST(WEBKIT_LIBS)
+#AC_SUBST(WEBKIT_CFLAGS)
+#AC_SUBST(WEBKIT_LIBS)
 	;;
 esac
 
-gtk2_modules="gtk+-2.0 >= 2.0.0"
-PKG_CHECK_MODULES(GTK2, [$gtk2_modules])
-AC_SUBST(GTK2_CFLAGS)
-AC_SUBST(GTK2_LIBS)
+gtk_modules="gtk+-2.0 >= 2.0.0"
+#gtk_modules="gtk+-3.0"
+PKG_CHECK_MODULES(GTK, [$gtk_modules])
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
 
 GETTEXT_PACKAGE=gprozubi
 AC_SUBST(GETTEXT_PACKAGE)

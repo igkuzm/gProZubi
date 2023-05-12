@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 09.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,7 +13,6 @@
 #include <string.h>
 #include "prozubilib/cases.h"
 #include "prozubilib/planlecheniya.h"
-#include "support.h"
 #include "planLecheniya.h"
 
 #include "prozubilib/prozubilib.h"
@@ -118,6 +117,8 @@ static void draw_zubformula(
 		return;
 	}
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+#else
 	GdkPixmap *pixmap;
 	GdkBitmap *mask;
 	gdk_pixbuf_render_pixmap_and_mask(pixbuf, &pixmap, &mask, 0);
@@ -149,6 +150,7 @@ static void draw_zubformula(
 #undef ZUBFORMULA_COORD
 
 	gdk_gc_unref(gc);
+#endif
 }
 
 static void redraw_zubformula(struct case_t *c, GtkWidget *image){
@@ -409,7 +411,7 @@ cases_edit_refresh(
 	GObject *delegate = G_OBJECT(casesWindow);
 	
 	/* get casesEditWindow */
-	GtkWidget * casesEditFrame = lookup_widget(casesWindow, "casesEditFrame");
+	GtkWidget * casesEditFrame = g_object_get_data(delegate, "casesEditFrame");
 	if (!casesEditFrame){
 		g_print("Error! Can't find casesEditFrame\n");
 		return NULL;
@@ -424,7 +426,11 @@ cases_edit_refresh(
 		case CASES_LIST_TYPE_TEXT:
 			{
 				// vertical box
-				GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+#if GTK_CHECK_VERSION(3, 2, 0)
+  GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+#else
+	GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+#endif
 				gtk_container_add(GTK_CONTAINER(casesEditFrame), vbox);
 				gtk_widget_show(vbox);
 				
@@ -450,8 +456,12 @@ cases_edit_refresh(
 				// text edit
 				GtkWidget *textEdit = gtk_text_view_new();
 				gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(textEdit), GTK_WRAP_WORD);
-				gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled),
+#if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_container_add(GTK_CONTAINER(scrolled), textEdit);
+#else
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled),
 						textEdit);
+#endif
 				const char *value = prozubi_case_get(c, key);
 				GtkTextBuffer *buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textEdit));
 				if (value){
@@ -469,7 +479,11 @@ cases_edit_refresh(
 			}
 		case CASES_LIST_TYPE_COMBOBOX:
 			{
-				GtkWidget *bbox = gtk_vbutton_box_new();
+#if GTK_CHECK_VERSION(3, 2, 0)
+	GtkWidget *bbox = gtk_button_box_new(GTK_ORIENTATION_VERTICAL);
+#else
+	GtkWidget *bbox = gtk_vbutton_box_new();
+#endif
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
 				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);
@@ -498,7 +512,11 @@ cases_edit_refresh(
 			}			
 		case CASES_LIST_TYPE_DATE:
 			{
-				GtkWidget *bbox = gtk_vbutton_box_new();
+#if GTK_CHECK_VERSION(3, 2, 0)
+	GtkWidget *bbox = gtk_button_box_new(GTK_ORIENTATION_VERTICAL);
+#else
+	GtkWidget *bbox = gtk_vbutton_box_new();
+#endif
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
 				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);
@@ -548,7 +566,11 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_ZFORMULA:
 			{
-				GtkWidget *bbox = gtk_vbutton_box_new();
+#if GTK_CHECK_VERSION(3, 2, 0)
+	GtkWidget *bbox = gtk_button_box_new(GTK_ORIENTATION_VERTICAL);
+#else
+	GtkWidget *bbox = gtk_vbutton_box_new();
+#endif
 				gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_CENTER);
 				gtk_container_add(GTK_CONTAINER(casesEditFrame), bbox);
 				gtk_widget_show(bbox);

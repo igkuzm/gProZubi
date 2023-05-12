@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 09.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include "prozubilib/prozubilib.h"
 #include "prozubilib/cases.h"
-#include "support.h"
 
 #include "prozubilib/planlecheniya.h"
 
@@ -806,7 +805,11 @@ plan_lecheniya_new(
 		)
 {
 	// vertical box
-	GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+#if GTK_CHECK_VERSION(3, 2, 0)
+  GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+#else
+  GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
+#endif
 	gtk_container_add(GTK_CONTAINER(parent), vbox);
 	gtk_widget_show(vbox);
 	
@@ -900,7 +903,12 @@ plan_lecheniya_new(
 					g_signal_connect(renderer, "edited", 
 							(GCallback) plan_lecheniya_table_cell_edited_callback, treeView);
 
-					GtkObject *adjustment = gtk_adjustment_new(0, 0, 100, 1, 10, 0);
+#if GTK_CHECK_VERSION(3, 2, 0)
+					GtkAdjustment
+#else
+					GtkObject 
+#endif
+					*adjustment = gtk_adjustment_new(0, 0, 100, 1, 10, 0);
 					g_object_set(renderer, "adjustment", adjustment, NULL);
 		
 					gtk_cell_renderer_set_fixed_size(renderer, -1, 40);
@@ -967,8 +975,11 @@ plan_lecheniya_new(
 		gtk_tree_view_append_column(GTK_TREE_VIEW(treeView), column);	
 	}
 
+#if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_container_add(GTK_CONTAINER(scrolled), treeView);
+#else
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled), treeView);	
-
+#endif
 	gtk_tree_view_expand_all(GTK_TREE_VIEW(treeView));
 	gtk_widget_show(treeView);
 

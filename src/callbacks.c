@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 06.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -13,7 +13,6 @@
 
 #include "callbacks.h"
 #include "interface.h"
-#include "support.h"
 
 #include "prozubilib/alloc.h"
 #include "prozubilib/log.h"
@@ -47,7 +46,7 @@ void
 on_patientListButton_clicked           (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget *mainWindow = lookup_widget(GTK_WIDGET(button), "mainWindow");;
+	GtkWidget *mainWindow = user_data;
 	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
 	clear_columns(mainWindow);
 	patient_list_new(mainWindow, p);
@@ -58,7 +57,7 @@ void
 on_doctorListButton_clicked            (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget *mainWindow = lookup_widget(GTK_WIDGET(button), "mainWindow");;
+	GtkWidget *mainWindow = user_data;
 	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
 	clear_columns(mainWindow);
 	doctor_list_new(mainWindow, p);
@@ -84,7 +83,7 @@ void
 on_caseAddButton_clicked               (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	GtkWidget *window = lookup_widget(GTK_WIDGET(toolbutton), "casesWindow");;
+	GtkWidget *window = user_data;
 	GObject *delegate = G_OBJECT(window);
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 	char *patientid = g_object_get_data(delegate, "patientid");
@@ -138,69 +137,11 @@ on_removeButton_clicked                (GtkToolButton   *toolbutton,
 
 
 void
-on_familiyaEntry_changed               (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_imiaEntry_changed                   (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_otchestvoEntry_changed              (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_emailEntry_changed                  (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_dateOfBirthEntry_changed            (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_telEntry_changed                    (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_commentEntry_changed                (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
 on_patientEditCancelButton_clicked     (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget * patientEditWindow = lookup_widget(
-			GTK_WIDGET(button), "patientEditWindow");
-	if (patientEditWindow)
-		gtk_widget_destroy(patientEditWindow);
+	GtkWidget * patientEditWindow = user_data;
+	gtk_widget_destroy(patientEditWindow);
 }
 
 
@@ -208,11 +149,8 @@ void
 on_patientEditSaveButton_clicked       (GtkButton       *button,
                                         gpointer         user_data)
 {
-	GtkWidget * patientEditWindow = lookup_widget(
-			GTK_WIDGET(button), "patientEditWindow");
-	
-	if (patientEditWindow)
-		patient_edit_save_button_pushed(patientEditWindow);
+	GtkWidget * patientEditWindow = user_data;
+	patient_edit_save_button_pushed(patientEditWindow);
 }
 
 
@@ -220,12 +158,7 @@ void
 on_addButton_clicked                   (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	GtkWidget * mainWindow = 
-			lookup_widget(GTK_WIDGET(toolbutton), "mainWindow");
-	if (!mainWindow){
-		g_print("Error! Can't find mainWindow\n");
-		return;
-	}	
+	GtkWidget * mainWindow = user_data; 
 	GObject *delegate = G_OBJECT(mainWindow);	
 	
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
@@ -257,8 +190,7 @@ void
 on_editButton_clicked                  (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	GtkWidget * mainWindow = 
-			lookup_widget(GTK_WIDGET(toolbutton), "mainWindow");
+	GtkWidget * mainWindow = user_data; 
 	if (!mainWindow){
 		g_print("Error! Can't find mainWindow\n");
 		return;
@@ -518,7 +450,7 @@ void
 on_mainWindowMenuDelete_activate       (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	patient_list_remove_clicked(menuitem);
+	patient_list_remove_clicked(user_data);
 }
 
 
@@ -615,7 +547,7 @@ void
 on_caseRemoveButton_clicked            (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	cases_list_remove_clicked(toolbutton);
+	cases_list_remove_clicked(user_data);
 }
 
 
@@ -623,7 +555,7 @@ void
 on_caseRefreshButton_clicked           (GtkToolButton   *toolbutton,
                                         gpointer         user_data)
 {
-	GtkWidget *window = lookup_widget(GTK_WIDGET(toolbutton), "casesWindow");;
+	GtkWidget *window = user_data;
 	GObject *delegate = G_OBJECT(window);
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 	char *patientid = g_object_get_data(delegate, "patientid");

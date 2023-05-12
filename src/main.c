@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 09.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -17,17 +17,29 @@
 #include <gtk/gtk.h>
 
 #include "interface.h"
-#include "support.h"
 #include "getbundle.h"
 
 #include "prozubilib/prozubilib.h"
 
-#include "patientList.h"
 #include "configFile.h"
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+void application_on_activate (
+		GtkApplication *app, 
+		gpointer user_data
+		) 
+{
+	GtkWidget *mainWindow = user_data;
+	mainWindow = create_mainWindow(app);
+}
+#endif
 
 int
 main (int argc, char *argv[])
 {
+#if GTK_CHECK_VERSION(3, 0, 0)
+	GtkApplication *app;
+#endif
   GtkWidget *mainWindow;
 
 #ifdef ENABLE_NLS
@@ -36,11 +48,10 @@ main (int argc, char *argv[])
   textdomain (GETTEXT_PACKAGE);
 #endif
 
+#if !GTK_CHECK_VERSION(2,24,0)
   gtk_set_locale ();
-  gtk_init (&argc, &argv);
-
-  add_pixmap_directory (PACKAGE_DATA_DIR "/" PACKAGE "/pixmaps");
-
+#endif
+  
 	/*load files from bundle */
 	
 	//get bundle directory
@@ -96,34 +107,15 @@ main (int argc, char *argv[])
 	//chworkdir
 	chdir(workdir);	
 
-	//get token
-	char * token = token_from_config();
-	g_print("init with token: %s\n", token);
-
-  /*
-   * The following code was added by Glade to create one of each component
-   * (except popup menus), just so that you see something after building
-   * the project. Delete any components that you don't want shown initially.
-   */
-  mainWindow = create_mainWindow ();
-  widget_restore_state_from_config(mainWindow, "mainWindow", 640, 480); 
-  GtkWidget *mainWindowLeftBox = lookup_widget(mainWindow, "mainWindowLeftBox");
-  if (mainWindowLeftBox)
-	widget_restore_state_from_config(mainWindowLeftBox, "mainWindowLeftBox", 300, 480); 
-
-  /* init database */
-  prozubi_t *p = prozubi_init(
-		  "ProZubi.sqlite",
-		  token);
-
-  g_object_set_data(G_OBJECT(mainWindow), "prozubi", p);
-
-  /* patient list as default at start */
-  patient_list_new(mainWindow, p);
-
-  gtk_widget_show (mainWindow);
-
-  gtk_main ();
-  return 0;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	app = gtk_application_new ("kuzm.ig.gprozubi", 0);
+	g_signal_connect (app, "activate", G_CALLBACK (application_on_activate), mainWindow); 
+	return g_application_run (G_APPLICATION (app), argc, argv);
+#else
+	gtk_init (&argc, &argv);
+	create_mainWindow ();
+	gtk_main ();
+	return 0;
+#endif
 }
 

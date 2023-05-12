@@ -3,9 +3,7 @@
 SUBDIRS = src po
 
 EXTRA_DIST = \
-	autogen.sh \
-	gprozubi.glade \
-	gprozubi.gladep
+	autogen.sh
 
 install-data-local:
 	@$(NORMAL_INSTALL)

@@ -2,7 +2,7 @@
  * File              : configFile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 01.05.2023
+ * Last Modified Date: 12.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,7 +13,6 @@
 
 #include <gtk/gtk.h>
 #include "prozubilib/cases.h"
-#include "support.h"
 #include "casesEdit.h"
 
 #include "prozubilib/prozubilib.h"
