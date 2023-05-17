@@ -76,12 +76,12 @@ main (int argc, char *argv[])
 	setenv("GTK_DATA_PREFIX", bundle, true);
 	setenv("GTK_PATH",        bundle, true);
 	//fix loaders cache
-	fpstrrep(
-			STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in", bundle), 
-			loaders_cache, 
-			"$bundle", 
-			bundle
-			);
+	//fpstrrep(
+			//STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in", bundle), 
+			//loaders_cache, 
+			//"$bundle", 
+			//bundle
+			//);
 #endif
 
 	//copy files from bundle

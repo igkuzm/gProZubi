@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 17.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include "patientList.h"
 #include "patientEdit.h"
 #include "doctorList.h"
+#include "pricesList.h"
 #include "configFile.h"
 
 void
@@ -78,7 +79,10 @@ void
 on_priceListButton_clicked             (GtkButton       *button,
                                         gpointer         user_data)
 {
-
+	GtkWidget *mainWindow = user_data;
+	prozubi_t *p = g_object_get_data(G_OBJECT(mainWindow), "prozubi");
+	clear_columns(mainWindow);
+	prices_list_new(mainWindow, p);
 }
 
 

@@ -27,8 +27,8 @@ case "${host_os}" in
 	;;
 esac
 
-gtk_modules="gtk+-2.0 >= 2.0.0"
-#gtk_modules="gtk+-3.0"
+#gtk_modules="gtk+-2.0 >= 2.0.0"
+gtk_modules="gtk+-3.0"
 PKG_CHECK_MODULES(GTK, [$gtk_modules])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
