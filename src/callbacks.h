@@ -2,7 +2,7 @@
  * File              : callbacks.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include <gtk/gtk.h>
@@ -103,6 +103,10 @@ on_mainWindowLeftBox_size_allocate     (GtkWidget       *widget,
                                         GdkRectangle    *allocation,
                                         gpointer         user_data);
 
+void
+on_nomenklaturaWindow_size_allocate     (GtkWidget       *widget,
+                                        GdkRectangle    *allocation,
+                                        gpointer         user_data);
 void
 on_casesWindowLeftBox_size_allocate    (GtkWidget       *widget,
                                         GdkRectangle    *allocation,

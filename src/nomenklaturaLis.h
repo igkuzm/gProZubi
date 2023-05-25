@@ -2,7 +2,7 @@
  * File              : nomenklaturaLis.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 17.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,6 +14,7 @@
 
 #include "prozubilib/prozubilib.h"
 #include "configFile.h"
+#include "callbacks.h"
 
 enum {
   NOMENKLATURA_LIST_COLUMN_NAME,
@@ -30,7 +31,7 @@ nomenklatura_list_table_model_new(){
 			G_TYPE_STRING,  // name
 			G_TYPE_STRING,  // kod
 			G_TYPE_POINTER, // n_cols
-			G_TYPE_STRING,  // id
+			G_TYPE_INT,     // id
 			G_TYPE_POINTER  // ptr
 	);
 
@@ -63,7 +64,6 @@ nomenklatura_list_fill_table(
 	gtk_tree_store_set(store, &iter, 
 			NOMENKLATURA_LIST_COLUMN_NAME,  p->name,
 			NOMENKLATURA_LIST_COLUMN_KOD,   p->kod,
-			NOMENKLATURA_LIST_N_COLUMNS,    NULL,
 			NOMENKLATURA_LIST_ID,           p->iD,
 			NOMENKLATURA_LIST_POINTER,      p,
 	-1);
@@ -139,6 +139,34 @@ nomenklatura_list_row_activated(
 	}
 }
 
+static gboolean
+nomenklatura_list_SearchEqualFunc(
+		GtkTreeModel* model,
+		int column,
+		const char* key,
+		GtkTreeIter* iter,
+		gpointer search_data
+		)
+{
+	const char * name;
+	gtk_tree_model_get(model, iter, NOMENKLATURA_LIST_COLUMN_NAME, &name, -1); 			
+	if (!name)
+		return 1;
+	
+	char *needle   = g_utf8_strup(key,  BUFSIZ); 
+	char *haystack = g_utf8_strup(name, BUFSIZ);
+	
+	if (g_strrstr(haystack, needle) != NULL){
+		free(needle);
+		free(haystack);
+		return 0;
+	}
+
+	free(needle);
+	free(haystack);
+	return 1;
+}
+
 static GtkWidget *
 nomenklatura_list_new(
 		GtkWidget *parent,
@@ -154,12 +182,34 @@ nomenklatura_list_new(
 	if (!parent) {
 		/* create new window */
 		GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		gtk_widget_set_size_request (window, 640, 480);
+		widget_restore_state_from_config(window, "nomenklaturaWindow", 640, 480); 
+		gtk_window_set_title (GTK_WINDOW (window), "Номенклатура");
+		g_signal_connect ((gpointer) window, "size_allocate",
+                    G_CALLBACK (on_nomenklaturaWindow_size_allocate),
+                    NULL);		
 		gtk_widget_show(window);	
+
+		/* create box */
+		GtkWidget *mainBox;
+		#if GTK_CHECK_VERSION(3, 2, 0)
+			mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+		#else
+			mainBox = gtk_vbox_new (FALSE, 0);
+		#endif
+		gtk_widget_show (mainBox);
+		gtk_container_add (GTK_CONTAINER (window), mainBox);
+		
+		/*create searchItem */
+		GtkWidget *searchEntry = gtk_entry_new ();
+		gtk_widget_show (searchEntry);
+		gtk_box_pack_start (GTK_BOX (mainBox), searchEntry, FALSE, FALSE, 0);
 
 		/* create scrolling window */
 		parent = gtk_scrolled_window_new(NULL, NULL);
-		gtk_container_add(GTK_CONTAINER(window), parent);
+		gtk_box_pack_start (GTK_BOX (mainBox), parent, TRUE, TRUE, 0);
 		gtk_widget_show(parent);	
+		g_object_set_data(G_OBJECT(parent), "searchEntry", searchEntry);		
 	}
 
 	/* set delegate */
@@ -167,25 +217,20 @@ nomenklatura_list_new(
 	g_object_set_data(delegate, "nomenklaturaCallback", callback);
 
 	/* get treeView */
-	GtkWidget * nomenklaturaListView = g_object_get_data(delegate, "nomenklaturaListView");
-	if (!nomenklaturaListView){
-		g_print("Error! Can't find nomenklaturaListView\n");
-		return NULL;
-	}
-	GtkWidget * oldWidget = gtk_bin_get_child (GTK_BIN (nomenklaturaListView)); 
-	if (oldWidget)
-		gtk_container_remove (GTK_CONTAINER (nomenklaturaListView), oldWidget); 
-
 	GtkWidget *treeView = gtk_tree_view_new();
 	if (!treeView){
 		g_print("Error! Can't create treeView\n");
 		return NULL;
 	}
-	g_object_set_data(delegate, "treeView", treeView);
+	g_object_set_data(delegate, "nomenklaturaTreeView", treeView);
 
 	/* create new model */
 	GtkTreeStore *store = nomenklatura_list_table_model_new();
 	g_object_set_data(delegate, "nomenklaturaListStore", store);
+	GtkWidget *search = g_object_get_data(delegate, "searchEntry");
+	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(treeView), GTK_ENTRY(search));
+	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeView), true);	
+	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(treeView), nomenklatura_list_SearchEqualFunc, NULL, NULL);
 
 	nomenklatura_list_update(delegate);
 

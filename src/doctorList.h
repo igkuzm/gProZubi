@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -260,6 +260,7 @@ static
 GtkWidget *doctor_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
+	g_object_set_data(delegate, "selectedItem", "doctors");
 
 	GtkWidget * mainView = g_object_get_data(delegate, "mainView");
 	if (!mainView){

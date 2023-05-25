@@ -2,7 +2,7 @@
  * File              : interface.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 20.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -217,6 +217,7 @@ create_mainWindow (void)
   gtk_widget_show (searchEntry);
   gtk_container_add (GTK_CONTAINER (searchItem), searchEntry);
   gtk_entry_set_invisible_char (GTK_ENTRY (searchEntry), 9679);
+  g_object_set_data(delegate, "searchEntry", searchEntry);
 
   /* MAIN VIEW */
   mainView = gtk_scrolled_window_new (NULL, NULL);
@@ -226,7 +227,6 @@ create_mainWindow (void)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (mainView), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (mainView), GTK_SHADOW_IN);
 	g_object_set_data(G_OBJECT(mainView), "mainWindow", mainWindow);
-	g_object_set_data(G_OBJECT(mainView), "searchEntry", searchEntry);
 
 	/* restore window size */
 	widget_restore_state_from_config(mainWindow, "mainWindow", 640, 480); 
@@ -271,12 +271,13 @@ create_casesWindow (void)
 	/* CASES WINDOW */
   casesWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	GObject *delegate = G_OBJECT(casesWindow);
-  gtk_widget_set_size_request (casesWindow, 640, 480);
+  //gtk_widget_set_size_request (casesWindow, 640, 480);
+	widget_restore_state_from_config(casesWindow, "casesWindow", 640, 480); 
   gtk_window_set_position (GTK_WINDOW (casesWindow), GTK_WIN_POS_CENTER_ALWAYS);
   gtk_window_set_modal (GTK_WINDOW (casesWindow), TRUE);
   g_signal_connect ((gpointer) casesWindow, "size_allocate",
-                    G_CALLBACK (on_casesWindow_size_allocate),
-                    NULL);
+					G_CALLBACK (on_casesWindow_size_allocate),
+					NULL);
 
 #if GTK_CHECK_VERSION(3, 2, 0)
   casesPaned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -286,7 +287,6 @@ create_casesWindow (void)
   g_object_set_data (delegate, "casesPaned", casesPaned);
   gtk_widget_show (casesPaned);
   gtk_container_add (GTK_CONTAINER (casesWindow), casesPaned);
-  gtk_paned_set_position (GTK_PANED (casesPaned), 0);
 
 #if GTK_CHECK_VERSION(3, 2, 0)
   casesWindowLeftBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -294,19 +294,19 @@ create_casesWindow (void)
   casesWindowLeftBox = gtk_vbox_new (FALSE, 0);
 #endif
   g_object_set_data (delegate, "casesWindowLeftBox", casesWindowLeftBox);
-  gtk_widget_show (casesWindowLeftBox);
   gtk_paned_pack1 (GTK_PANED (casesPaned), casesWindowLeftBox, FALSE, TRUE);
+  widget_restore_state_from_config(casesWindowLeftBox, "casesWindowLeftBox", 300, 480);  
+  gtk_widget_show (casesWindowLeftBox);
   g_signal_connect ((gpointer) casesWindowLeftBox, "size_allocate",
                     G_CALLBACK (on_casesWindowLeftBox_size_allocate),
                     NULL);
-
 	/* CASES TOOLBAR */
   casesListToolbar = gtk_toolbar_new ();
   g_object_set_data (delegate, "casesListToolbar", casesListToolbar);
-  gtk_widget_show (casesListToolbar);
   gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListToolbar, FALSE, FALSE, 0);
   gtk_toolbar_set_style (GTK_TOOLBAR (casesListToolbar), GTK_TOOLBAR_ICONS);
   tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (casesListToolbar));
+  gtk_widget_show (casesListToolbar);
 
 #if GTK_CHECK_VERSION(3, 10, 0)
 	caseAddButton = (GtkWidget*) gtk_tool_button_new(
@@ -315,8 +315,8 @@ create_casesWindow (void)
   caseAddButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-add");
 #endif
   g_object_set_data (delegate, "caseAddButton", caseAddButton);
-  gtk_widget_show (caseAddButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseAddButton);
+  gtk_widget_show (caseAddButton);
   g_signal_connect ((gpointer) caseAddButton, "clicked",
                     G_CALLBACK (on_caseAddButton_clicked),
                     casesWindow);
@@ -325,11 +325,11 @@ create_casesWindow (void)
 	caseRemoveButton = (GtkWidget*) gtk_tool_button_new(
 			gtk_image_new_from_icon_name("gtk-remove", GTK_ICON_SIZE_LARGE_TOOLBAR), "gtk-remove");
 #else
-  caseRemoveButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-add");
+  caseRemoveButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-remove");
 #endif
   g_object_set_data (delegate, "caseRemoveButton", caseRemoveButton);
-  gtk_widget_show (caseRemoveButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
+  gtk_widget_show (caseRemoveButton);
   g_signal_connect ((gpointer) caseRemoveButton, "clicked",
                     G_CALLBACK (on_caseRemoveButton_clicked),
                     casesWindow);
@@ -341,8 +341,8 @@ create_casesWindow (void)
   caseRefreshButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-refresh");
 #endif
   g_object_set_data (delegate, "caseRefreshButton", caseRefreshButton);
-  gtk_widget_show (caseRefreshButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRefreshButton);
+  gtk_widget_show (caseRefreshButton);
   g_signal_connect ((gpointer) caseRefreshButton, "clicked",
                     G_CALLBACK (on_caseRefreshButton_clicked),
                     casesWindow);
@@ -350,14 +350,14 @@ create_casesWindow (void)
 	/* CASES LIST VIEW */
   casesListView = gtk_scrolled_window_new (NULL, NULL);
   g_object_set_data (delegate, "casesListView", casesListView);
-  gtk_widget_show (casesListView);
   gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListView, TRUE, TRUE, 0);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (casesListView), GTK_SHADOW_IN);
+  gtk_widget_show (casesListView);
 
   casesListInfo = gtk_label_new ("");
   g_object_set_data (delegate, "casesListInfo", casesListInfo);
-  gtk_widget_show (casesListInfo);
   gtk_box_pack_start (GTK_BOX (casesWindowLeftBox), casesListInfo, FALSE, FALSE, 0);
+  gtk_widget_show (casesListInfo);
 
 	/* CASES EDIT FRAME */
   casesEditFrame = gtk_frame_new (NULL);
@@ -379,6 +379,7 @@ create_casesWindow (void)
   gtk_frame_set_label_widget (GTK_FRAME (casesEditFrame), label12);
   gtk_label_set_use_markup (GTK_LABEL (label12), TRUE);
 
+  gtk_widget_show_all (casesWindow);
   return casesWindow;
 }
 

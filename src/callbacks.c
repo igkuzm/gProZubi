@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 17.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -22,6 +22,7 @@
 #include "doctorList.h"
 #include "pricesList.h"
 #include "configFile.h"
+#include "nomenklaturaLis.h"
 
 void
 gprozubi_quit(GtkWidget *mainWindow){
@@ -131,6 +132,15 @@ on_mainWindowLeftBox_size_allocate     (GtkWidget       *widget,
 
 }
 
+void
+on_nomenklaturaWindow_size_allocate     (GtkWidget       *widget,
+                                        GdkRectangle    *allocation,
+                                        gpointer         user_data)
+{
+	save_widget_state(widget, allocation, "nomenklaturaWindow");
+
+}
+
 
 void
 on_casesWindowLeftBox_size_allocate    (GtkWidget       *widget,
@@ -173,29 +183,38 @@ on_addButton_clicked                   (GtkToolButton   *toolbutton,
 {
 	GtkWidget * mainWindow = user_data; 
 	GObject *delegate = G_OBJECT(mainWindow);	
-	
+	const char * selectedItem =
+		g_object_get_data(delegate, "selectedItem");
+
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 	if (!p){
 		g_print("prozubi_t pointer is null\n");
 		return;
 	}
+	
+	if (strcmp(selectedItem, "patients") == 0){
 
-	struct passport_t *c = prozubi_passport_new(
-			p, 
-			"Новый", 
-			"пациент", 
-			"", 
-			"", 
-			"", 
-			"", 
-			"", 
-			"", 
-			0, 
-			NULL
-			);
+		struct passport_t *c = prozubi_passport_new(
+				p, 
+				"Новый", 
+				"пациент", 
+				"", 
+				"", 
+				"", 
+				"", 
+				"", 
+				"", 
+				0, 
+				NULL
+				);
 
-	if (c)
-		patient_edit_new(mainWindow, p, c, TRUE);
+		if (c)
+			patient_edit_new(mainWindow, p, c, TRUE);
+	}
+
+	else if (strcmp(selectedItem, "prices") == 0){
+		nomenklatura_list_new(NULL, NULL, NULL);
+	}	
 }
 
 

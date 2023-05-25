@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 20.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,6 +11,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include "cairo.h"
 #include "prozubilib/cases.h"
 #include "prozubilib/planlecheniya.h"
 #include "planLecheniya.h"
@@ -111,13 +112,50 @@ static void draw_zubformula(
 		)
 {
 	GdkPixbuf *pixbuf = 
-			gdk_pixbuf_new_from_file("src/images/zubFormula.jpg", NULL);
+			gdk_pixbuf_new_from_file("/Users/kuzmich/src/gProZubi/src/images/zubFormula.jpg", NULL);
 	if (!pixbuf){
-		g_print("can't load image: %s", "src/images/zubFormula.jpg");
+		g_print("can't load image: %s", "/Users/kuzmich/src/gProZubi/src/images/zubFormula.jpg");
 		return;
 	}
 
 #if GTK_CHECK_VERSION(3, 0, 0)
+
+	//gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+	GdkWindow* window = gtk_widget_get_window (image);
+
+	cairo_region_t *region = gdk_window_get_clip_region(window);
+	GdkDrawingContext *drawingContext = 
+			gdk_window_begin_draw_frame (window, region);
+	cairo_t *cr = 
+			gdk_drawing_context_get_cairo_context(drawingContext);	
+	
+	//cairo_t *cr = gdk_cairo_create (window);
+    gdk_cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+		
+	GtkStyleContext *context = gtk_widget_get_style_context (image);
+	GtkStateFlags flags = gtk_widget_get_state_flags (image);
+	GdkRGBA color; 
+	gdk_rgba_parse(&color, "#ff0000");
+	gdk_cairo_set_source_rgba (cr, &color);\
+
+#define ZUBFORMULA_COORD(num, left, right, top, bottom, x, y)\
+	{\
+		const char *value = prozubi_case_get(c, num);\
+		if (!value)\
+			value = "";\
+		PangoLayout *layout =\
+			gtk_widget_create_pango_layout(image, value);\
+		cairo_move_to (cr, x, y);\
+		pango_cairo_show_layout (cr, layout);\
+	}
+	
+	//ZUBFORMULA_COORDS
+#undef ZUBFORMULA_COORD
+
+	cairo_fill (cr);
+	cairo_paint (cr);
+	//cairo_destroy (cr);
+
 #else
 	GdkPixmap *pixmap;
 	GdkBitmap *mask;
@@ -144,7 +182,7 @@ static void draw_zubformula(
 			gtk_widget_create_pango_layout(image, value);\
 		gdk_draw_layout(GDK_DRAWABLE(pixmap),\
 		   	gc, x, y, layout);\
-	}\
+	}
 	
 	ZUBFORMULA_COORDS
 #undef ZUBFORMULA_COORD

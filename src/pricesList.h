@@ -2,7 +2,7 @@
  * File              : pricesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 17.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -357,6 +357,8 @@ static GtkWidget *
 prices_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
+	
+	g_object_set_data(delegate, "selectedItem", "prices");
 
 	GtkWidget *mainView = g_object_get_data(delegate, "mainView");
 	

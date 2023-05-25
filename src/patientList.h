@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 23.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -149,12 +149,6 @@ patient_list_row_activated(
 			char title[BUFSIZ];
 			sprintf(title, "%s %s %s", patient->familiya, patient->imia, patient->otchestvo);
 			gtk_window_set_title(GTK_WINDOW(casesWindow), title);
-			widget_restore_state_from_config(casesWindow, "casesWindow", 640, 480); 
-			GtkWidget *casesWindowLeftBox = g_object_get_data(
-					G_OBJECT(casesWindow), "casesWindowLeftBox");
-			if (casesWindowLeftBox)
-				widget_restore_state_from_config(
-						casesWindowLeftBox, "casesWindowLeftBox", 300, 480); 
 			
 			gtk_widget_show(casesWindow);
 
@@ -410,6 +404,7 @@ static GtkWidget *
 patient_list_new(GtkWidget *mainWindow, prozubi_t *p){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(mainWindow);
+	g_object_set_data(delegate, "selectedItem", "patients");
 
 	GtkWidget *mainView = g_object_get_data(delegate, "mainView");
 	
