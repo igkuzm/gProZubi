@@ -115,7 +115,7 @@ zubformula_draw(
 	cairo_t *cr = cairo_create(surface);
 	GdkRGBA color; 
 	gdk_rgba_parse(&color, "#ff0000");
-	gdk_cairo_set_source_rgba (cr, &color);\
+	gdk_cairo_set_source_rgba (cr, &color);
 
 #define ZUBFORMULA_COORD(num, left, right, top, bottom, x, y)\
 	{\

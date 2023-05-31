@@ -373,7 +373,7 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_XRAY:
 			{
-				return xray_new(casesEditFrame, p, c);
+				return xray_new(GTK_WINDOW(casesWindow), casesEditFrame, p, c);
 			}			
 
 		default:

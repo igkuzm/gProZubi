@@ -14,6 +14,7 @@
 
 GtkWidget *
 xray_new(
+		GtkWindow *window,
 		GtkWidget *parent,
 		prozubi_t *p, 
 		struct case_t *c		

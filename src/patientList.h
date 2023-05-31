@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.05.2023
+ * Last Modified Date: 31.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -278,8 +278,10 @@ patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) {
 
 	//add remove button
 	GtkWidget *button = gtk_button_new_with_label("УДАЛИТЬ");
-	//GtkStyleContext *context = gtk_widget_get_style_context(button);
-	//gtk_style_context_add_class(context, "destructive-action");
+#if GTK_CHECK_VERSION(3, 0, 0)	
+	GtkStyleContext *context = gtk_widget_get_style_context(button);
+	gtk_style_context_add_class(context, "destructive-action");
+#endif
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
 	
 	//add cancel button

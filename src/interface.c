@@ -2,7 +2,7 @@
  * File              : interface.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 31.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -315,12 +315,7 @@ create_casesWindow (void)
   tmp_toolbar_icon_size = gtk_toolbar_get_icon_size (GTK_TOOLBAR (casesListToolbar));
   gtk_widget_show (casesListToolbar);
 
-#if GTK_CHECK_VERSION(3, 10, 0)
-	caseAddButton = (GtkWidget*) gtk_tool_button_new(
-			gtk_image_new_from_icon_name("gtk-add", GTK_ICON_SIZE_LARGE_TOOLBAR), "gtk-add");
-#else
-  caseAddButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-add");
-#endif
+  caseAddButton = (GtkWidget*) gtk_tool_button_new_from_stock (GTK_STOCK_ADD);
   g_object_set_data (delegate, "caseAddButton", caseAddButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseAddButton);
   gtk_widget_show (caseAddButton);
@@ -328,12 +323,7 @@ create_casesWindow (void)
                     G_CALLBACK (on_caseAddButton_clicked),
                     casesWindow);
 
-#if GTK_CHECK_VERSION(3, 10, 0)
-	caseRemoveButton = (GtkWidget*) gtk_tool_button_new(
-			gtk_image_new_from_icon_name("gtk-remove", GTK_ICON_SIZE_LARGE_TOOLBAR), "gtk-remove");
-#else
-  caseRemoveButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-remove");
-#endif
+  caseRemoveButton = (GtkWidget*) gtk_tool_button_new_from_stock (GTK_STOCK_REMOVE);
   g_object_set_data (delegate, "caseRemoveButton", caseRemoveButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRemoveButton);
   gtk_widget_show (caseRemoveButton);
@@ -341,12 +331,7 @@ create_casesWindow (void)
                     G_CALLBACK (on_caseRemoveButton_clicked),
                     casesWindow);
 
-#if GTK_CHECK_VERSION(3, 10, 0)
-	caseRefreshButton = (GtkWidget*) gtk_tool_button_new(
-			gtk_image_new_from_icon_name("gtk-refresh", GTK_ICON_SIZE_LARGE_TOOLBAR), "gtk-refresh");
-#else
-  caseRefreshButton = (GtkWidget*) gtk_tool_button_new_from_stock ("gtk-refresh");
-#endif
+  caseRefreshButton = (GtkWidget*) gtk_tool_button_new_from_stock (GTK_STOCK_REFRESH);
   g_object_set_data (delegate, "caseRefreshButton", caseRefreshButton);
   gtk_container_add (GTK_CONTAINER (casesListToolbar), caseRefreshButton);
   gtk_widget_show (caseRefreshButton);
