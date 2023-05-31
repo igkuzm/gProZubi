@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 31.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -53,7 +53,6 @@ main (int argc, char *argv[])
 #endif
   
 	/*load files from bundle */
-	
 	//get bundle directory
 	char *bundle = getbundle(argv);
 	if (!bundle){
@@ -85,6 +84,7 @@ main (int argc, char *argv[])
 #endif
 
 	//copy files from bundle
+	///* TODO: copy image files */
 	char *files[] = 
 	{
 		"MKBCodes.sqlite", 

@@ -2,7 +2,7 @@
  * File              : interface.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 20.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -26,6 +26,10 @@
 #include "prozubilib/prozubilib.h"
 #include "patientList.h"
 #include "menu.h"
+
+void print_error(void *userdata, const char *error){
+	g_print("%s\n", error);
+}
 
 void application_on_deactivate (GtkWidget *window, gpointer userdata) {
 	g_application_quit (userdata);
@@ -98,13 +102,6 @@ create_mainWindow (void)
 	/* create main menu */
 
 #if GTK_CHECK_VERSION(3, 2, 0)
-	GtkWidget *mainWindowMenu =  create_main_menu(app, mainWindow);
-#else
-	GtkWidget *mainWindowMenu =  create_main_menu(mainWindow);
-  gtk_box_pack_start (GTK_BOX (mainBox), mainWindowMenu, FALSE, FALSE, 0);
-#endif
-
-#if GTK_CHECK_VERSION(3, 2, 0)
   mainWindowPaned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
   gtk_container_add (GTK_CONTAINER (mainBox), mainWindowPaned);
 #else
@@ -164,6 +161,13 @@ create_mainWindow (void)
 #endif
   gtk_widget_show (mainWindowRightBox);
   gtk_paned_pack2 (GTK_PANED (mainWindowPaned), mainWindowRightBox, TRUE, TRUE);
+
+#if GTK_CHECK_VERSION(3, 2, 0)
+	GtkWidget *mainWindowMenu =  create_main_menu(app, mainWindow);
+#else
+	GtkWidget *mainWindowMenu =  create_main_menu(mainWindow);
+  gtk_box_pack_start (GTK_BOX (mainWindowRightBox), mainWindowMenu, FALSE, FALSE, 0);
+#endif
 
   	/* MAIN TOOLBAR */
   toolbar1 = gtk_toolbar_new ();
@@ -239,7 +243,10 @@ create_mainWindow (void)
   /* init database */
   prozubi_t *p = prozubi_init(
 			"ProZubi.sqlite",
-			token);
+			token,
+			print_error, NULL,
+			print_error, NULL
+			);
 
   g_object_set_data(delegate, "prozubi", p);
 
@@ -274,7 +281,7 @@ create_casesWindow (void)
   //gtk_widget_set_size_request (casesWindow, 640, 480);
 	widget_restore_state_from_config(casesWindow, "casesWindow", 640, 480); 
   gtk_window_set_position (GTK_WINDOW (casesWindow), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_modal (GTK_WINDOW (casesWindow), TRUE);
+  //gtk_window_set_modal (GTK_WINDOW (casesWindow), TRUE);
   g_signal_connect ((gpointer) casesWindow, "size_allocate",
 					G_CALLBACK (on_casesWindow_size_allocate),
 					NULL);

@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 17.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -52,14 +52,9 @@ cases_list_table_model_free(GtkTreeModel* model, GtkTreePath* path,
 static void * 
 cases_list_fill_table(
 		void *user_data,
-		struct case_t *c,
-		void *allocated_ptr,
 		void * parent,
 		bool has_children,
-		char * title,
-		enum tagCASES key,
-		enum tagCASES_LIST_TYPE type,
-		char ** array
+		struct case_list_node *n
 		)
 {
 	GObject *delegate = user_data;
@@ -69,12 +64,12 @@ cases_list_fill_table(
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, parent);
 	gtk_tree_store_set(store, &iter, 
-			CASES_LIST_COLUMN_TITLE,          title,
-			CASES_LIST_COLUMN_KEY,            key,
-			CASES_LIST_COLUMN_TYPE,           type,
-			CASES_LIST_COLUMN_COMBOBOX_ARRAY, array,
-			CASES_LIST_ALLOCATED_PTR,         allocated_ptr,
-			CASES_LIST_POINTER,               c,
+			CASES_LIST_COLUMN_TITLE,          n->title,
+			CASES_LIST_COLUMN_KEY,            n->key,
+			CASES_LIST_COLUMN_TYPE,           n->type,
+			CASES_LIST_COLUMN_COMBOBOX_ARRAY, n->array,
+			CASES_LIST_ALLOCATED_PTR,         n->allocated_ptr,
+			CASES_LIST_POINTER,               n->c,
 	-1);
 
 	return gtk_tree_iter_copy(&iter);
@@ -85,8 +80,9 @@ cases_list_get_list(void *userdata, struct case_t * c){
 
 	GObject *delegate = userdata;
 	GtkTreeStore *store = g_object_get_data(delegate, "casesListStore");	
+	prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 
-	prozubi_cases_list_foreach(c, delegate, cases_list_fill_table);	
+	prozubi_cases_list_foreach(p, c, delegate, cases_list_fill_table);	
 	return 0;
 }
 

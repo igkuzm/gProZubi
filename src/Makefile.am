@@ -15,6 +15,8 @@ bin_PROGRAMS = gprozubi
 gprozubi_SOURCES = \
 	main.c \
 	interface.c interface.h \
+	ZubFormula.c ZubFormula.h \
+	Xray.c Xray.h \
 	callbacks.c callbacks.h
 gprozubi_CFLAGS = $(GTK_CFLAGS)
 gprozubi_LDADD = $(INTLLIBS) $(GTK_LIBS) \

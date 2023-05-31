@@ -2,7 +2,7 @@
  * File              : nomenklaturaLis.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -75,6 +75,7 @@ static void
 nomenklatura_list_update(GObject * delegate){
 	g_print("Update nomenklaturaList\n");
 	GtkTreeStore *store = g_object_get_data(delegate, "nomenklaturaListStore");	
+	prozubi_t *p = g_object_get_data(delegate, "prozubi");
 
 	/* clear store */
 	gtk_tree_model_foreach (GTK_TREE_MODEL(store), 
@@ -82,7 +83,7 @@ nomenklatura_list_update(GObject * delegate){
 	gtk_tree_store_clear(store);
 	
 	/* get list of nomenklaturas */
-	prozubi_nomenklatura_foreach(delegate, nomenklatura_list_fill_table);
+	prozubi_nomenklatura_foreach(p, delegate, nomenklatura_list_fill_table);
 }
 
 static void

@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -285,7 +285,7 @@ on_telEntry_insert_text                (GtkEditable     *editable,
 	GtkEntry *entry = GTK_ENTRY(editable);
 	const gchar * old_text = gtk_entry_get_text(entry);	
 
-	char *text = MALLOC(BUFSIZ, ERR("%s", "can't allocate text"), return);
+	char *text = MALLOC(BUFSIZ, g_print("%s", "can't allocate text"), return);
 
 	int i = 0;
 	text[i] = 0;
@@ -363,7 +363,7 @@ on_dateOfBirthEntry_insert_text        (GtkEditable     *editable,
 		return;
 	}	
 
-	char *text = MALLOC(BUFSIZ, ERR("%s", "can't allocate text"), return);
+	char *text = MALLOC(BUFSIZ, g_print("%s", "can't allocate text"), return);
 	int i = 0;
 	text[i] = 0;
 

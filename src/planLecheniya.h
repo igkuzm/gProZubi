@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 20.05.2023
+ * Last Modified Date: 30.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -129,8 +129,9 @@ plan_lecheniya_get_list(void *userdata, cJSON * json){
 
 	GObject *delegate = userdata;
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");	
+	prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 
-	prozubi_planlecheniya_foreach(json, delegate, plan_lecheniya_fill_table);	
+	prozubi_planlecheniya_foreach(p, json, delegate, plan_lecheniya_fill_table);	
 	return 0;
 }
 
@@ -353,13 +354,13 @@ plan_lecheniya_add_stage(
 		)
 {		
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");
-	/*prozubi_t * p =  g_object_get_data(delegate, "prozubi"); */
+	prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 	struct case_t *c=  g_object_get_data(delegate, "case"); 
 
 	if (c->planlecheniya == NULL)
 		prozubi_planlecheniya_new(c);
 
-	prozubi_planlecheniya_add_stage(c->planlecheniya);
+	prozubi_planlecheniya_add_stage(p, c->planlecheniya);
 	plan_lecheniya_update(delegate, c->planlecheniya);
 }
 
@@ -374,11 +375,11 @@ plan_lecheniya_add_item(
 		)
 {		
 	GtkTreeStore *store = g_object_get_data(delegate, "planLecheniyaStore");
-	/*prozubi_t * p =  g_object_get_data(delegate, "prozubi"); */
+	prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
 	struct case_t *c=  g_object_get_data(delegate, "case"); 
 
 	prozubi_planlecheniya_add_item(
-			c->planlecheniya, index, title, kod, price, count
+			p, c->planlecheniya, index, title, kod, price, count
 			);
 	plan_lecheniya_update(delegate, c->planlecheniya);
 }
