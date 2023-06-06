@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 02.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -49,8 +49,9 @@ static GtkListStore
 
 static void 
 patient_list_store_add(GtkListStore *store, struct passport_t * patient){
-	GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);
-  gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");
+	/*GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);*/
+  /*gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");*/
+	gchar *date_str = "";
 
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
@@ -65,9 +66,9 @@ patient_list_store_add(GtkListStore *store, struct passport_t * patient){
 			PATIENT_LIST_POINTER,            patient,
 	-1);
 
-	g_date_time_unref(d);
-	if (date_str)
-		free(date_str);
+	/*g_date_time_unref(d);*/
+	/*if (date_str)*/
+		/*free(date_str);*/
 }
 
 static int 
@@ -281,6 +282,10 @@ patient_list_ask_to_remove(GObject *delegate, struct passport_t * patient) {
 #if GTK_CHECK_VERSION(3, 0, 0)	
 	GtkStyleContext *context = gtk_widget_get_style_context(button);
 	gtk_style_context_add_class(context, "destructive-action");
+#else 
+	GdkColor color;
+	gdk_color_parse("#ff0000", &color);
+	gtk_widget_modify_bg(button, 0, &color);	
 #endif
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
 	
@@ -383,7 +388,8 @@ patient_list_SearchEqualFunc(
 			return 0;\
 		}\
 	}	
-#define PASSPORT_COLUMN_DATE(member, number, title)\
+#define PASSPORT_COLUMN_DATE(member, number, title)
+	//\
 	{\
 		GDateTime *d = g_date_time_new_from_unix_local(patient->member);\
 		gchar *haystack = g_date_time_format(d,  "%d.%m.%Y");\

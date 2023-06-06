@@ -2,7 +2,7 @@
  * File              : Xray.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 31.05.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 01.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -75,8 +75,7 @@ void
 xray_t_free(struct xray_t *x){
 	int i;
 	for (i = 0; i < x->count; ++i) {
-		if (x->images[i])
-			xray_image_t_free(x->images[i]);
+		xray_image_t_free(x->images[i]);
 	}
 	free(x->images);
 	free(x);
@@ -127,7 +126,7 @@ xray_image_press_callback (
 			
 #else	
 		GdkColor color;
-		gdk_color_parse("#000000ff", &color);
+		gdk_color_parse("#ffffff", &color);
 		gtk_widget_modify_bg(ximage->frame, 0, &color);	
 		
 #endif		
@@ -190,12 +189,28 @@ xray_grid_add_image(struct xray_t *x, struct xray_image_t *ximage)
 		  G_CALLBACK (xray_image_press_callback),
 		  x);
 
+	//box
+	GtkWidget *box;
+#if GTK_CHECK_VERSION(3, 2, 0)
+	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+#else
+	box = gtk_vbox_new(FALSE, 0);
+#endif				
+	gtk_container_add(GTK_CONTAINER(event_box), box);
+	gtk_widget_show(box);	
+
+	//label
+	GtkWidget *label = gtk_label_new(ximage->image->title);
+	gtk_box_pack_end(GTK_BOX(box), label, FALSE, FALSE, 0);
+	gtk_widget_show(label);	
+
 	//frame
 	GtkWidget *frame = gtk_frame_new(NULL);
 	gtk_widget_set_size_request(frame, 200, 200);
 	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
 	gtk_widget_show(frame);	
-	gtk_container_add(GTK_CONTAINER (event_box), frame);	
+	//gtk_container_add(GTK_CONTAINER (event_box), frame);	
+	gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
 	ximage->frame = frame;
 
 	//image
@@ -219,7 +234,7 @@ xray_grid_add_image(struct xray_t *x, struct xray_image_t *ximage)
 			);
 
 	GdkColor color;
-	gdk_color_parse("#000000ff", &color);
+	gdk_color_parse("#ffffff", &color);
 	gtk_widget_modify_bg(frame, 0, &color);	
 
 #endif	
@@ -391,6 +406,10 @@ xray_images_ask_to_remove(
 #if GTK_CHECK_VERSION(3, 0, 0)	
 	GtkStyleContext *context = gtk_widget_get_style_context(button);
 	gtk_style_context_add_class(context, "destructive-action");
+#else 
+	GdkColor color;
+	gdk_color_parse("#ff0000", &color);
+	gtk_widget_modify_bg(button, 0, &color);	
 #endif
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
 	

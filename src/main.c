@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 02.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -91,15 +91,15 @@ main (int argc, char *argv[])
 		"nomenklatura.sqlite", 
 		NULL
 	};
-	for (int i = 0; files[i]; ++i) {
-		GFile *sfile = g_file_new_build_filename(bundle,  files[i], NULL);
-		GFile *dfile = g_file_new_build_filename(workdir, files[i], NULL);
+	//for (int i = 0; files[i]; ++i) {
+		//GFile *sfile = g_file_new_build_filename(bundle,  files[i], NULL);
+		//GFile *dfile = g_file_new_build_filename(workdir, files[i], NULL);
 		
-		GError *error = NULL;
-		g_file_copy(sfile, dfile, 0, NULL, NULL, NULL, &error);
-		if (error)
-			printf("g_file_copy error: %s\n", error->message);
-	}
+		//GError *error = NULL;
+		//g_file_copy(sfile, dfile, 0, NULL, NULL, NULL, &error);
+		//if (error)
+			//printf("g_file_copy error: %s\n", error->message);
+	//}
 
 	//free bundle var
 	free(bundle);

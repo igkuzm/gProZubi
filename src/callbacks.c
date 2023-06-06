@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 06.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -22,7 +22,7 @@
 #include "doctorList.h"
 #include "pricesList.h"
 #include "configFile.h"
-#include "nomenklaturaLis.h"
+#include "Nomenklatura.h"
 
 void
 gprozubi_quit(GtkWidget *mainWindow){
@@ -133,16 +133,6 @@ on_mainWindowLeftBox_size_allocate     (GtkWidget       *widget,
 }
 
 void
-on_nomenklaturaWindow_size_allocate     (GtkWidget       *widget,
-                                        GdkRectangle    *allocation,
-                                        gpointer         user_data)
-{
-	save_widget_state(widget, allocation, "nomenklaturaWindow");
-
-}
-
-
-void
 on_casesWindowLeftBox_size_allocate    (GtkWidget       *widget,
                                         GdkRectangle    *allocation,
                                         gpointer         user_data)
@@ -213,7 +203,7 @@ on_addButton_clicked                   (GtkToolButton   *toolbutton,
 	}
 
 	else if (strcmp(selectedItem, "prices") == 0){
-		nomenklatura_list_new(NULL, NULL, NULL);
+		nomenklatura_list_new(NULL, p, NULL, NULL);
 	}	
 }
 

@@ -2,7 +2,7 @@
  * File              : configFile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 20.05.2023
+ * Last Modified Date: 02.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -17,6 +17,28 @@
 
 #include "prozubilib/prozubilib.h"
 
+static gboolean
+key_file_save_to_file (GKeyFile     *key_file,
+                       const gchar  *filename,
+                       GError      **error)
+{
+	gchar *contents;
+	gboolean success;
+	gsize length;
+
+	g_return_val_if_fail (key_file != NULL, FALSE);
+	g_return_val_if_fail (filename != NULL, FALSE);
+	g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+	contents = g_key_file_to_data (key_file, &length, NULL);
+	g_assert (contents != NULL);
+
+	success = g_file_set_contents (filename, contents, length, error);
+	g_free (contents);
+
+	return success;
+}
+
 static void 
 widget_save_state_to_config(
 		const char * widget_name, 
@@ -30,7 +52,7 @@ widget_save_state_to_config(
 	g_key_file_set_integer(key_file, widget_name, "y",  y);
 	g_key_file_set_integer(key_file, widget_name, "width",  width);
 	g_key_file_set_integer(key_file, widget_name, "height", height);
-	g_key_file_save_to_file(key_file, CONFIG_FILE, NULL);
+	key_file_save_to_file(key_file, CONFIG_FILE, NULL);
 }
 
 
@@ -88,7 +110,7 @@ save_colummn_state (
 	GKeyFile *key_file = g_key_file_new ();
 	g_key_file_load_from_file(key_file, CONFIG_FILE, 0, NULL);
 	g_key_file_set_integer(key_file, name, col_n,  width);
-	g_key_file_save_to_file(key_file, CONFIG_FILE, NULL);	
+	key_file_save_to_file(key_file, CONFIG_FILE, NULL);	
 }
 
 static gint 
@@ -113,7 +135,7 @@ save_token_to_config(const char * token, time_t expires, const char * reftoken){
 	g_key_file_set_value(key_file, "YandexDisk", "token", token);
 	g_key_file_set_int64(key_file, "YandexDisk", "expires", expires);
 	g_key_file_set_value(key_file, "YandexDisk", "reftoken", reftoken);
-	g_key_file_save_to_file(key_file, CONFIG_FILE, NULL);	
+	key_file_save_to_file(key_file, CONFIG_FILE, NULL);	
 }
 
 static char * 

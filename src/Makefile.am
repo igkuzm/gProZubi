@@ -2,23 +2,37 @@
 
 SUBDIRS = prozubilib
 
-INCLUDES = \
+AM_CFLAGS = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\"
 
-#lib_LTLIBRARIES = libYDConnect.la
-libYDConnect_la_SOURCES = YDConnect.cc webview.h
-libYDConnect_la_CXXFLAGS = $(WEBKIT_CFLAGS)
-libYDConnect_la_LIBADD = $(WEBKIT_LIBS)
+if WIN32
+CURL_LINK = -Lprozubilib/kdata2/cYandexDisk/curl/windows/win32/bin
+endif
+
+if WIN64
+CURL_LINK = -Lprozubilib/kdata2/cYandexDisk/curl/windows/win64/bin
+endif
+
+if !WINDOWS
+SQLITE_LINK = -lsqlite3
+endif
 
 bin_PROGRAMS = gprozubi
 gprozubi_SOURCES = \
 	main.c \
 	interface.c interface.h \
 	ZubFormula.c ZubFormula.h \
+	Nomenklatura.c Nomenklatura.h \
 	Xray.c Xray.h \
+	TextEdit.c TextEdit.h \
+	Calendar.c Calendar.h \
+	ComboBox.c ComboBox.h \
 	callbacks.c callbacks.h
 gprozubi_CFLAGS = $(GTK_CFLAGS)
 gprozubi_LDADD = $(INTLLIBS) $(GTK_LIBS) \
-								 -Lprozubilib/. -lprozubilib -lcurl -lsqlite3
-#-L.libs/ -lYDConnect
+								 prozubilib/*.o \
+								 prozubilib/kdata2/*.o \
+								 prozubilib/kdata2/cYandexDisk/*.o \
+								 $(SQLITE_LINK) \
+								 -lcurl $(CURL_LINK) -lstdc++

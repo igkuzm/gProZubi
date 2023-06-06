@@ -2,7 +2,7 @@
  * File              : interface.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 06.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -31,9 +31,11 @@ void print_error(void *userdata, const char *error){
 	g_print("%s\n", error);
 }
 
+#if GTK_CHECK_VERSION(3, 0, 0)
 void application_on_deactivate (GtkWidget *window, gpointer userdata) {
 	g_application_quit (userdata);
 }
+#endif
 
 GtkWidget*
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -244,8 +246,8 @@ create_mainWindow (void)
   prozubi_t *p = prozubi_init(
 			"ProZubi.sqlite",
 			token,
-			print_error, NULL,
-			print_error, NULL
+			NULL, print_error,
+			NULL, print_error
 			);
 
   g_object_set_data(delegate, "prozubi", p);

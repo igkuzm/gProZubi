@@ -2,7 +2,7 @@
  * File              : patientEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 03.05.2023
- * Last Modified Date: 12.05.2023
+ * Last Modified Date: 02.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -54,7 +54,8 @@ patient_edit_save_button_pushed(gpointer data){
 		prozubi_passport_set_text(key, p, patient, text, true);\
 	}
 
-#define PATIENT_EDIT_TYPE_EDATE(member, name, key)\
+#define PATIENT_EDIT_TYPE_EDATE(member, name, key)
+	//\
 	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\
@@ -139,7 +140,8 @@ patient_edit_new(
 	}\
 	gtk_entry_set_text(GTK_ENTRY(name), patient->member);
 
-#define PATIENT_EDIT_TYPE_EDATE(member, name, key)\
+#define PATIENT_EDIT_TYPE_EDATE(member, name, key)
+	//\
 	GtkWidget * name = g_object_get_data(delegate, #name);\
 	if (!name){\
 		g_print("Error! Can't find " #name "\n");\

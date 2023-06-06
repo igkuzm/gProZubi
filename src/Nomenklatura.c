@@ -1,8 +1,8 @@
 /**
- * File              : nomenklaturaLis.h
+ * File              : Nomenklatura.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
- * Date              : 01.04.2023
- * Last Modified Date: 30.05.2023
+ * Date              : 01.06.2023
+ * Last Modified Date: 06.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,10 +11,8 @@
 
 #include <gtk/gtk.h>
 #include "prozubilib/nomenklatura.h"
-
-#include "prozubilib/prozubilib.h"
 #include "configFile.h"
-#include "callbacks.h"
+#include "Nomenklatura.h"
 
 enum {
   NOMENKLATURA_LIST_COLUMN_NAME,
@@ -25,7 +23,7 @@ enum {
   NOMENKLATURA_LIST_NUM,
 };
 
-static GtkTreeStore *
+GtkTreeStore *
 nomenklatura_list_table_model_new(){
 	GtkTreeStore *store = gtk_tree_store_new(NOMENKLATURA_LIST_NUM, 
 			G_TYPE_STRING,  // name
@@ -38,17 +36,25 @@ nomenklatura_list_table_model_new(){
 	return store;
 }
 
-static gboolean 
+gboolean 
 nomenklatura_list_table_model_free(GtkTreeModel* model, GtkTreePath* path, 
 		GtkTreeIter* iter, gpointer data) 
 {
-	struct nomenklatura_t * c;
+	nomenklatura_t * c;
 	gtk_tree_model_get(model, iter, NOMENKLATURA_LIST_POINTER, &c, -1);	
-	free(c);
+	prozubi_nomenklatura_free(c);
 	return FALSE;
 }
 
-static void * 
+void 
+nomenklatura_list_on_destroy(GtkWidget *treeView, gpointer userdata) {
+	g_print("treeview_on_destroy\n");
+	gtk_tree_model_foreach (GTK_TREE_MODEL(userdata), 
+			nomenklatura_list_table_model_free, NULL);
+	gtk_tree_store_clear(userdata);	
+}
+
+void * 
 nomenklatura_list_fill_table(
 		void *user_data,
 		void * parent,
@@ -57,10 +63,12 @@ nomenklatura_list_fill_table(
 {
 	GObject *delegate = user_data;
 	GtkTreeStore *store = g_object_get_data(delegate, "nomenklaturaListStore");	
+	
+	g_print("Add: %s\n", p->name);
 
 	GtkTreeIter * parent_iter = parent;
 	GtkTreeIter iter;
-	gtk_tree_store_append(store, &iter, parent);
+	gtk_tree_store_append(store, &iter, parent_iter);
 	gtk_tree_store_set(store, &iter, 
 			NOMENKLATURA_LIST_COLUMN_NAME,  p->name,
 			NOMENKLATURA_LIST_COLUMN_KOD,   p->kod,
@@ -71,7 +79,7 @@ nomenklatura_list_fill_table(
 	return gtk_tree_iter_copy(&iter);
 }
 
-static void 
+void 
 nomenklatura_list_update(GObject * delegate){
 	g_print("Update nomenklaturaList\n");
 	GtkTreeStore *store = g_object_get_data(delegate, "nomenklaturaListStore");	
@@ -86,7 +94,7 @@ nomenklatura_list_update(GObject * delegate){
 	prozubi_nomenklatura_foreach(p, delegate, nomenklatura_list_fill_table);
 }
 
-static void
+void
 nomenklatura_list_resize_column (
 		GtkTreeViewColumn *column,
         gpointer w,
@@ -98,7 +106,7 @@ nomenklatura_list_resize_column (
 	save_colummn_state(width - 4, col, "nomenklaturaList");
 }
 
-static void 
+void 
 nomenklatura_list_row_activated(
 		GtkTreeView *treeview, 
 		GtkTreePath *path, 
@@ -140,7 +148,16 @@ nomenklatura_list_row_activated(
 	}
 }
 
-static gboolean
+void
+on_nomenklaturaWindow_size_allocate     (GtkWidget       *widget,
+                                        GdkRectangle    *allocation,
+                                        gpointer         user_data)
+{
+	save_widget_state(widget, allocation, "nomenklaturaWindow");
+
+}
+
+gboolean
 nomenklatura_list_SearchEqualFunc(
 		GtkTreeModel* model,
 		int column,
@@ -168,9 +185,10 @@ nomenklatura_list_SearchEqualFunc(
 	return 1;
 }
 
-static GtkWidget *
+GtkWidget *
 nomenklatura_list_new(
 		GtkWidget *parent,
+		prozubi_t *p,
 		void *user_data,	
 		int (*callback)(
 			void *user_data,
@@ -216,6 +234,7 @@ nomenklatura_list_new(
 	/* set delegate */
 	GObject *delegate = G_OBJECT(parent);
 	g_object_set_data(delegate, "nomenklaturaCallback", callback);
+	g_object_set_data(delegate, "prozubi", p);
 
 	/* get treeView */
 	GtkWidget *treeView = gtk_tree_view_new();
@@ -233,6 +252,10 @@ nomenklatura_list_new(
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeView), true);	
 	gtk_tree_view_set_search_equal_func(GTK_TREE_VIEW(treeView), nomenklatura_list_SearchEqualFunc, NULL, NULL);
 
+	g_signal_connect ((gpointer) treeView, "destroy",
+                    G_CALLBACK (nomenklatura_list_on_destroy),
+                    store);		
+	
 	nomenklatura_list_update(delegate);
 
 	/* set tree model for view */
@@ -301,3 +324,4 @@ nomenklatura_list_new(
 }
 
 #endif /* ifndef NOMENKLATURA_LIST_H */
+

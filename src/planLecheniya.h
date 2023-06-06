@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 30.05.2023
+ * Last Modified Date: 31.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -554,6 +554,14 @@ plan_lecheniya_ask_to_remove(GObject *delegate, gchar *path) {
 	//add remove button
 	GtkWidget *button = gtk_button_new_with_label("УДАЛИТЬ");
 	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), button, GTK_RESPONSE_DELETE_EVENT);
+#if GTK_CHECK_VERSION(3, 0, 0)	
+	GtkStyleContext *context = gtk_widget_get_style_context(button);
+	gtk_style_context_add_class(context, "destructive-action");
+#else 
+	GdkColor color;
+	gdk_color_parse("#ff0000", &color);
+	gtk_widget_modify_bg(button, 0, &color);	
+#endif	
 	
 	//add cancel button
 	gtk_dialog_add_button(GTK_DIALOG(dialog), "Отмена", GTK_RESPONSE_CANCEL);
