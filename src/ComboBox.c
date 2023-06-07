@@ -2,11 +2,25 @@
  * File              : ComboBox.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.06.2023
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 07.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "ComboBox.h"
+
+enum {
+  COMBOBOX_TITLE,
+  COMBOBOX_N
+};
+
+static GtkListStore *
+combobox_model_new(){
+	GtkListStore *store = gtk_list_store_new(COMBOBOX_N, 
+			G_TYPE_STRING  // title
+	);
+
+	return store;
+}
 
 void 
 cases_edit_combobox_changed (GtkComboBox *widget, gpointer user_data) {
@@ -39,18 +53,27 @@ combo_box_new(
 	gtk_container_add(GTK_CONTAINER(parent), bbox);
 	gtk_widget_show(bbox);
 	
+	GtkListStore *model = combobox_model_new(); 
+	GtkWidget *combobox = gtk_combo_box_new_with_model(GTK_TREE_MODEL(model));
+	
 	const char *value = prozubi_case_get(c, key);
-	GtkWidget *combobox = gtk_combo_box_new();
 	char **ptr = array;
-	int i = 0;
+	int i = 0, selected = -1;
 	while (ptr[i]){
-		char *str = ptr[i];	
-		gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), str);
+		gtk_list_store_insert_with_values(model, NULL, -1, COMBOBOX_TITLE, ptr[i], -1);
 		if (value)
-			if (strcmp(value, str) == 0)
+			if (strcmp(value, ptr[i]) == 0)
 				gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), i);
 		i++;
 	}
+	g_object_unref(model);
+
+	GtkCellRenderer *column = gtk_cell_renderer_text_new();
+	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(combobox), column, TRUE);
+	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combobox), column,
+                                   "text", COMBOBOX_TITLE,
+									NULL);
+	
 	g_object_set_data(G_OBJECT(combobox), "prozubi", p);
 	g_object_set_data(G_OBJECT(combobox), "case", c);
 	g_object_set_data(G_OBJECT(combobox), "key", GINT_TO_POINTER(key));

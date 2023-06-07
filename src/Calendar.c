@@ -2,11 +2,12 @@
  * File              : Calendar.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.06.2023
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 07.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "Calendar.h"
+#include "prozubilib/date-time/time_local.h"
 
 void
 cases_edit_date_entry_insert_text(
@@ -101,14 +102,22 @@ cases_edit_calendar_changed (GtkCalendar *widget, gpointer user_data) {
 
 	guint year, month, day; 
 	gtk_calendar_get_date(widget, &year, &month, &day);
-	/*GDateTime *date = g_date_time_new_local(year, month, day, 12, 0, 0.0);*/
+	struct tm tm = {
+		.tm_year = year - 1900,
+		.tm_mon = month,
+		.tm_mday = day,
+		.tm_hour = 12,
+		.tm_min = 0,
+		.tm_sec = 0,
+	};
+	time_t date = ya_mktime(&tm);
 
 	GtkWidget *entry = user_data;
-	/*gtk_entry_set_text(GTK_ENTRY(entry), g_date_time_format(date, "%d.%m.%Y"));	*/
+	char datestr[16];
+	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	gtk_entry_set_text(GTK_ENTRY(entry), datestr);	
 	
-	/*prozubi_case_set_date(key, p, c, g_date_time_to_unix(date));*/
-
-	/*g_date_time_unref(date);*/
+	prozubi_case_set_date(key, p, c, date);
 }
 
 void 
@@ -124,26 +133,27 @@ cases_edit_date_entry_changed(GtkEntry *widget, gpointer   data){
 	/* guess time format */
 	guint day, month, year;
 	if (sscanf(text, "%d.%d.%d", &day, &month, &year) != 3)
-		/*if (sscanf(text, "%d/%d/%d", &day, &month, &year) != 3)*/
-			/*if (sscanf(text, "%d-%d-%d", &day, &month, &year) != 3)*/
-				gtk_calendar_get_date(calendar, &year, &month, &day);
+		gtk_calendar_get_date(calendar, &year, &month, &day);
+	else
+		month -= 1;
 
-	/*GDateTime *date = */
-			/*g_date_time_new_local(year, month, day, 12, 0, 0.0);*/
-	/*if (!date)*/
-		/*return;*/
+	struct tm tm = {
+		.tm_year = year - 1900,
+		.tm_mon = month,
+		.tm_mday = day,
+		.tm_hour = 12,
+		.tm_min = 0,
+		.tm_sec = 0,
+	};
+	time_t date = ya_mktime(&tm);
+	
+	char datestr[16];
+	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	gtk_entry_set_text(GTK_ENTRY(widget), datestr);	
 
-	/*char *str = g_date_time_format(date, "%d.%m.%Y"); */
-	/*gtk_entry_set_text(widget, str);*/
-	/*free(str);*/
-	
-	/*gtk_calendar_select_month(GTK_CALENDAR(calendar), */
-			/*g_date_time_get_month(date), */
-					/*g_date_time_get_year(date));*/
-	/*gtk_calendar_select_day(GTK_CALENDAR(calendar), */
-			/*g_date_time_get_day_of_month(date));*/
-	
-	/*g_date_time_unref(date);*/
+	gtk_calendar_select_month(GTK_CALENDAR(calendar), tm.tm_mon, tm.tm_year + 1900); 
+	gtk_calendar_select_day(GTK_CALENDAR(calendar), tm.tm_mday); 
+
 }
 
 GtkWidget *
@@ -163,15 +173,16 @@ calendar_new(
 	gtk_container_add(GTK_CONTAINER(parent), bbox);
 	gtk_widget_show(bbox);
 	
-	time_t *value = prozubi_case_get(c, key);
-	/*GDateTime *d = g_date_time_new_from_unix_local(*value); */
+	time_t *date = prozubi_case_get(c, key);
+	struct tm tm;
+	sec_to_tm(*date, &tm);
 
 	GtkWidget *entry = gtk_entry_new();
-	/*char *str = g_date_time_format(d, "%d.%m.%Y"); */
-	/*gtk_entry_set_text(GTK_ENTRY(entry), str);*/
-	/*gtk_container_add(GTK_CONTAINER (bbox), entry);	*/
-	/*free(str);*/
-	/*gtk_widget_show(entry);*/
+	char datestr[16];
+	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	gtk_entry_set_text(GTK_ENTRY(entry), datestr);
+	gtk_container_add(GTK_CONTAINER (bbox), entry);	
+	gtk_widget_show(entry);
 
 	g_object_set_data(G_OBJECT(entry), "prozubi", p);
 	g_object_set_data(G_OBJECT(entry), "case", c);
@@ -179,13 +190,8 @@ calendar_new(
 
 	
 	GtkWidget *calendar = gtk_calendar_new();
-	/*gtk_calendar_select_month(GTK_CALENDAR(calendar), */
-			/*g_date_time_get_month(d), */
-					/*g_date_time_get_year(d));*/
-	/*gtk_calendar_select_day(GTK_CALENDAR(calendar), */
-			/*g_date_time_get_day_of_month(d));*/
-	
-	/*g_date_time_unref(d);*/
+	gtk_calendar_select_month(GTK_CALENDAR(calendar), tm.tm_mon, tm.tm_year + 1900); 
+	gtk_calendar_select_day(GTK_CALENDAR(calendar), tm.tm_mday); 
 	
 	g_object_set_data(G_OBJECT(calendar), "prozubi", p);
 	g_object_set_data(G_OBJECT(calendar), "case", c);
