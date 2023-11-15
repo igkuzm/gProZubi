@@ -4,7 +4,10 @@ AC_INIT([gprozubi], [0.1])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
+AC_CONFIG_MACRO_DIRS([m4])
+
 AC_PROG_CC
+AC_PROG_CXX
 
 LT_INIT
 
@@ -42,9 +45,12 @@ AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
 AC_CONFIG_FILES([
-Makefile
-src/Makefile
-src/prozubilib/Makefile
+	Makefile
+	src/Makefile
+	src/prozubilib/Makefile
+	src/prozubilib/kdata2/Makefile
+	src/prozubilib/kdata2/cYandexDisk/Makefile
+	po/Makefile.in
 ])
 
 AC_OUTPUT

@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 05.08.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -87,7 +87,7 @@ cases_list_get_list(void *userdata, struct case_t * c){
 }
 
 static void 
-cases_list_update(GObject * delegate, prozubi_t *p, char patientid[37]){
+cases_list_update(GObject * delegate, prozubi_t *p, struct passport_t *patient){
 	g_print("Update casesList\n");
 	if (!delegate){
 		g_print("Delegate is NULL\n");
@@ -112,7 +112,11 @@ cases_list_update(GObject * delegate, prozubi_t *p, char patientid[37]){
 	gtk_tree_store_clear(store);
 
 	/* get list of casess */
+<<<<<<< HEAD
 	prozubi_cases_foreach(p, patientid, NULL, delegate, cases_list_get_list);
+=======
+	prozubi_cases_foreach(p, patient->id, NULL, delegate, cases_list_get_list);
+>>>>>>> 35061ed (planlecheniya print)
 }
 
 static void 
@@ -153,7 +157,12 @@ cases_list_row_activated(
 				CASES_LIST_COLUMN_KEY, &key, -1); 
 
 		/* todo: refresh casesEditWindow */
+<<<<<<< HEAD
 		cases_edit_refresh(GTK_WIDGET(delegate), p, patient, c, key, type, combobox_array);
+=======
+		cases_edit_refresh(
+				GTK_WIDGET(delegate), p, patient, c, key, type, combobox_array);
+>>>>>>> 35061ed (planlecheniya print)
 	}
 }
 
@@ -212,7 +221,11 @@ cases_list_cursor_changed(
 				CASES_LIST_COLUMN_KEY, &key, -1); 
 
 		/* todo: refresh casesEditWindow */
+<<<<<<< HEAD
 		cases_edit_refresh(GTK_WIDGET(delegate), p,  patient, c, key, type, combobox_array);
+=======
+		cases_edit_refresh(GTK_WIDGET(delegate), p, patient, c, key, type, combobox_array);
+>>>>>>> 35061ed (planlecheniya print)
 	}	
 }
 
@@ -229,7 +242,7 @@ cases_list_ask_to_remove_responce(
 		GObject *delegate = userdata;
 		struct case_t * c =  g_object_get_data(delegate, "casesToRemove"); 
 		prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
-		char * patientid =  g_object_get_data(delegate, "patientid"); 
+		struct passport_t *patient =  g_object_get_data(delegate, "patient"); 
 		
 		if (!c){
 			g_print("cases is NULL\n");
@@ -240,7 +253,7 @@ cases_list_ask_to_remove_responce(
 
 		/* remove cases and update table */
 		prozubi_case_remove(p, c);
-		cases_list_update(delegate, p, patientid);
+		cases_list_update(delegate, p, patient);
 	}
 	/*gtk_window_destroy(GTK_WINDOW(dialog));*/
 	gtk_widget_destroy(GTK_WIDGET(dialog));
@@ -377,10 +390,16 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, struct passport_t *patient)
 	GtkTreeStore *store = cases_list_table_model_new();
 	g_object_set_data(delegate, "casesListStore", store);
 	g_object_set_data(delegate, "patient", patient);
+<<<<<<< HEAD
 	g_object_set_data(delegate, "patientid", patient->id);
 	g_object_set_data(delegate, "prozubi", p);
 
 	cases_list_update(delegate, p, patient->id);
+=======
+	g_object_set_data(delegate, "prozubi", p);
+
+	cases_list_update(delegate, p, patient);
+>>>>>>> 35061ed (planlecheniya print)
 
 	/* set tree model for view */
 	//GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));

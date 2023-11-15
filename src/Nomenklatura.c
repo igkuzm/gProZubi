@@ -2,7 +2,7 @@
  * File              : Nomenklatura.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.06.2023
- * Last Modified Date: 05.08.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -91,7 +91,11 @@ nomenklatura_list_update(GObject * delegate){
 	gtk_tree_store_clear(store);
 	
 	/* get list of nomenklaturas */
+<<<<<<< HEAD
 	prozubi_nomenklatura_foreach(p, NULL, delegate, nomenklatura_list_fill_table);
+=======
+	prozubi_nomenklatura_foreach(p, "", delegate, nomenklatura_list_fill_table);
+>>>>>>> 35061ed (planlecheniya print)
 }
 
 void

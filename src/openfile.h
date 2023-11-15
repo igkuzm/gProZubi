@@ -2,7 +2,7 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -19,7 +19,7 @@ extern "C" {
 
 #include <stdio.h>
 
-int openfile(const char *path) {
+static int openfile(const char *path) {
 #if defined _WIN32_
 #include <windows.h>
   ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);

@@ -2,14 +2,14 @@
  * File              : configFile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 10.11.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #ifndef CONFIG_FILE_H
 #define CONFIG_FILE_H
 
-#define CONFIG_FILE "prozubi.ini"
+#define CONFIG_FILE "gprozubi.ini"
 
 #include <gtk/gtk.h>
 #include "prozubilib/cases.h"
@@ -64,7 +64,8 @@ save_widget_state (
 		)
 {
 	const char * window_name = userdata;
-	widget_save_state_to_config(window_name, allocation->x, allocation->y, allocation->width, allocation->height);
+	widget_save_state_to_config(
+			window_name, allocation->x, allocation->y, allocation->width, allocation->height);
 }
 
 static void 

@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 19.08.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -23,6 +23,7 @@
 
 #include "interface.h"
 #include "getbundle.h"
+#include "helpers.h"
 
 #include "prozubilib/prozubilib.h"
 
@@ -80,16 +81,16 @@ main (int argc, char *argv[])
 	setenv("GTK_DATA_PREFIX", bundle, true);
 	setenv("GTK_PATH",        bundle, true);
 	//fix loaders cache
-	//fpstrrep(
-			//STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in", bundle), 
-			//loaders_cache, 
-			//"$bundle", 
-			//bundle
-			//);
+	fpstrrep(
+			STR("%s/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in", bundle), 
+			loaders_cache, 
+			"$bundle", 
+			bundle
+			);
 #endif
 
 	//copy files from bundle
-	///* TODO: copy image files */
+	// copy databases
 	char *files[] = 
 	{
 		"MKBCodes.sqlite", 
@@ -124,6 +125,25 @@ main (int argc, char *argv[])
 			if (!dest)
 				g_print("can't open file: %s: %s\n",
 						dest_path, strerror(errno));
+		}
+	}
+			
+	// copy images and templates
+	{
+		char *files[] = 
+		{
+			"images", 
+			"Templates", 
+			NULL
+		};
+		for (int i = 0; files[i]; ++i) {
+			GFile *sfile = g_file_new_build_filename(bundle,  files[i], NULL);
+			GFile *dfile = g_file_new_build_filename(workdir, files[i], NULL);
+			
+			GError *error = NULL;
+			copy_recursive(sfile, dfile, 0, NULL, &error);
+			if (error)
+				printf("g_file_copy error: %s\n", error->message);
 		}
 	}
 

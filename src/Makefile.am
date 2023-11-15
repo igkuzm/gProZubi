@@ -35,4 +35,4 @@ gprozubi_LDADD = $(INTLLIBS) $(GTK_LIBS) -lm \
 								 prozubilib/kdata2/*.o \
 								 prozubilib/kdata2/cYandexDisk/*.o \
 								 $(SQLITE_LINK) \
-								 -lcurl $(CURL_LINK) -lstdc++
+								 -lcurl $(CURL_LINK) -lstdc++ -lm

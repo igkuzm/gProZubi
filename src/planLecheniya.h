@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 05.08.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -18,6 +18,9 @@
 #include "prozubilib/documents.h"
 
 #include "prozubilib/planlecheniya.h"
+#include "prozubilib/documents.h"
+
+#include "openfile.h"
 
 enum {
   PLAN_LECHENIYA_COLUMN_TITLE,
@@ -568,22 +571,34 @@ plan_lecheniya_ask_to_remove(GObject *delegate, gchar *path) {
 }
 
 static void
-plan_lecheniya_print_clicked(GtkWidget *sender, gpointer user_data)
-{
+plan_lecheniya_print_clicked(GtkWidget *sender, gpointer user_data){
 	g_print("print clicked\n");	
-	GObject *delegate = G_OBJECT(user_data);
-	prozubi_t *p = g_object_get_data(delegate, "prozubi");
-	struct case_t *c = g_object_get_data(delegate, "case");
-	struct passport_t *patient = g_object_get_data(delegate, "patient");
-	const char *file =
-			documents_get_plan_lecheniya(
+	
+	//get delegate
+	GObject *delegate = user_data;
+	prozubi_t * p =  g_object_get_data(delegate, "prozubi"); 
+	struct passport_t *patient=  g_object_get_data(delegate, "patient"); 
+	struct case_t *c=  g_object_get_data(delegate, "case"); 
+
+	GError *error = NULL;
+	g_app_info_launch_default_for_uri(
+			"file:///home/kuzmich/gProZubi/Templates/planLecheniyaTemplate.rtf", NULL, &error);
+	if (error)
+		g_warning("%s\n", error->message);
+
+	return;
+	const char *rtf =
+		documents_get_plan_lecheniya(
 				"Templates/planLecheniyaTemplate.rtf", 
 				p, patient, c);
-	if (file){
-		char command[BUFSIZ];
-		sprintf(command, "xdg-open %s", file);
-		system(command);
-	}
+	if (rtf){
+		openfile(rtf);
+		/*GError *error = NULL;*/
+		/*g_app_info_launch_default_for_uri(rtf, NULL, &error);*/
+		/*if (error)*/
+			/*g_warning("%s\n", error->message);*/
+	} else 
+		g_warning("can't create RTF\n");
 }
 
 static void
@@ -868,6 +883,7 @@ plan_lecheniya_new(
 	g_object_set_data(delegate, "prozubi", p);
 	g_object_set_data(delegate, "patient", patient);
 	g_object_set_data(delegate, "case", c);
+	g_object_set_data(delegate, "patient", patient);
 
 	plan_lecheniya_update(delegate, json);
 

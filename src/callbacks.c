@@ -2,7 +2,7 @@
  * File              : callbacks.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 06.06.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifdef HAVE_CONFIG_H
@@ -101,9 +101,9 @@ on_caseAddButton_clicked               (GtkToolButton   *toolbutton,
 	GtkWidget *window = user_data;
 	GObject *delegate = G_OBJECT(window);
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
-	char *patientid = g_object_get_data(delegate, "patientid");
-	prozubi_case_new_for_patient(p, patientid);
-	cases_list_update(delegate, p, patientid);
+	struct passport_t *patient = g_object_get_data(delegate, "patient");
+	prozubi_case_new_for_patient(p, patient->id);
+	cases_list_update(delegate, p, patient);
 }
 
 void
@@ -580,8 +580,8 @@ on_caseRefreshButton_clicked           (GtkToolButton   *toolbutton,
 	GtkWidget *window = user_data;
 	GObject *delegate = G_OBJECT(window);
 	prozubi_t *p = g_object_get_data(delegate, "prozubi");
-	char *patientid = g_object_get_data(delegate, "patientid");
-	cases_list_update(delegate, p, patientid);
+	struct passport_t *patient = g_object_get_data(delegate, "patient");
+	cases_list_update(delegate, p, patient);
 }
 
 

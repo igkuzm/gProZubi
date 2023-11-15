@@ -1,6 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src
+SUBDIRS = src po
+ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
 	autogen.sh

@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 05.08.2023
+ * Last Modified Date: 15.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -79,7 +79,12 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_PLANLECHENIYA:
 			{
+<<<<<<< HEAD
 				return plan_lecheniya_new(casesEditFrame, c->planlecheniya, p, patient, c);	
+=======
+				return plan_lecheniya_new(
+						casesEditFrame, c->planlecheniya, p, patient, c);	
+>>>>>>> 35061ed (planlecheniya print)
 			}			
 
 		case CASES_LIST_TYPE_XRAY:
