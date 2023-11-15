@@ -2,7 +2,7 @@
  * File              : planLecheniya.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,8 +12,10 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "prozubilib/passport.h"
 #include "prozubilib/prozubilib.h"
 #include "prozubilib/cases.h"
+#include "prozubilib/documents.h"
 
 #include "prozubilib/planlecheniya.h"
 
@@ -65,14 +67,7 @@ static void *
 plan_lecheniya_fill_table(
 			void *userdata,
 			void *parent,
-			cJSON *json,
-			PLANLECHENIYA_TYPE type,
-			int index,
-			char * title,
-			char * kod,
-			char * price,
-			char * count,
-			char * total
+			struct planlecheniya_t *t
 		)
 {
 	GObject *delegate = userdata;
@@ -82,25 +77,25 @@ plan_lecheniya_fill_table(
 	gboolean tp_editable = TRUE, count_editable = TRUE;
 	gint style = PANGO_STYLE_NORMAL;
 	
-	if (type == PLANLECHENIYA_TYPE_ITEM){
+	if (t->type == PLANLECHENIYA_TYPE_ITEM){
 		stock_id = GTK_STOCK_REMOVE; 
 	}
-	if (type == PLANLECHENIYA_TYPE_STAGE){
+	if (t->type == PLANLECHENIYA_TYPE_STAGE){
 		stock_id = GTK_STOCK_ADD; 
 	}
 
-	if (type == PLANLECHENIYA_TYPE_STAGE ||
-			type == PLANLECHENIYA_TYPE_STAGE_PRICE ||
-			type == PLANLECHENIYA_TYPE_STAGE_DURATION ||
-			type == PLANLECHENIYA_TYPE_TOTAL_PRICE ||
-			type == PLANLECHENIYA_TYPE_TOTAL_DURATION
+	if (t->type == PLANLECHENIYA_TYPE_STAGE ||
+			t->type == PLANLECHENIYA_TYPE_STAGE_PRICE ||
+			t->type == PLANLECHENIYA_TYPE_STAGE_DURATION ||
+			t->type == PLANLECHENIYA_TYPE_TOTAL_PRICE ||
+			t->type == PLANLECHENIYA_TYPE_TOTAL_DURATION
 			)
 	{
 		style = PANGO_STYLE_OBLIQUE;
 		tp_editable = FALSE;
 		count_editable = FALSE;
 	}
-	if (type == PLANLECHENIYA_TYPE_STAGE_DURATION) {
+	if (t->type == PLANLECHENIYA_TYPE_STAGE_DURATION) {
 		count_editable = TRUE;
 	}
 
@@ -108,17 +103,17 @@ plan_lecheniya_fill_table(
 	GtkTreeIter iter;
 	gtk_tree_store_append(store, &iter, parent);
 	gtk_tree_store_set(store, &iter, 
-			PLAN_LECHENIYA_COLUMN_TITLE,  title,
-			PLAN_LECHENIYA_COLUMN_COUNT,  count,
-			PLAN_LECHENIYA_COLUMN_PRICE,  price,
-			PLAN_LECHENIYA_COLUMN_TOTAL,  total,
+			PLAN_LECHENIYA_COLUMN_TITLE,  t->title,
+			PLAN_LECHENIYA_COLUMN_COUNT,  t->count,
+			PLAN_LECHENIYA_COLUMN_PRICE,  t->price,
+			PLAN_LECHENIYA_COLUMN_TOTAL,  t->total,
 			PLAN_LECHENIYA_COLUMN_BUTTON, stock_id,
 			PLAN_LECHENIYA_N_COLUMNS,     NULL,
 			PLAN_LECHENIYA_IS_TITLE_PRICE_EDITABLE,   tp_editable,
 			PLAN_LECHENIYA_IS_COUNT_EDITABLE,   count_editable,
 			PLAN_LECHENIYA_PANGO_STYLE,   style,
-			PLAN_LECHENIYA_TYPE,          type,
-			PLAN_LECHENIYA_KOD,           kod,
+			PLAN_LECHENIYA_TYPE,          t->type,
+			PLAN_LECHENIYA_KOD,           t->kod,
 	-1);
 
 	return gtk_tree_iter_copy(&iter);
@@ -573,6 +568,25 @@ plan_lecheniya_ask_to_remove(GObject *delegate, gchar *path) {
 }
 
 static void
+plan_lecheniya_print_clicked(GtkWidget *sender, gpointer user_data)
+{
+	g_print("print clicked\n");	
+	GObject *delegate = G_OBJECT(user_data);
+	prozubi_t *p = g_object_get_data(delegate, "prozubi");
+	struct case_t *c = g_object_get_data(delegate, "case");
+	struct passport_t *patient = g_object_get_data(delegate, "patient");
+	const char *file =
+			documents_get_plan_lecheniya(
+				"Templates/planLecheniyaTemplate.rtf", 
+				p, patient, c);
+	if (file){
+		char command[BUFSIZ];
+		sprintf(command, "xdg-open %s", file);
+		system(command);
+	}
+}
+
+static void
 plan_lecheniya_remove_clicked(GtkWidget *sender, gpointer user_data){
 	g_print("remove clicked\n");	
 	
@@ -815,6 +829,7 @@ plan_lecheniya_new(
 		GtkWidget *parent, 
 		cJSON *json,
 		prozubi_t *p,
+		struct passport_t *patient,
 		struct case_t *c
 		)
 {
@@ -851,6 +866,7 @@ plan_lecheniya_new(
 	GtkTreeStore *store = plan_lecheniya_table_model_new();
 	g_object_set_data(delegate, "planLecheniyaStore", store);
 	g_object_set_data(delegate, "prozubi", p);
+	g_object_set_data(delegate, "patient", patient);
 	g_object_set_data(delegate, "case", c);
 
 	plan_lecheniya_update(delegate, json);
@@ -1011,6 +1027,8 @@ plan_lecheniya_new(
 	gtk_widget_show(GTK_WIDGET(del));
 	
 	GtkToolItem *print = gtk_tool_button_new_from_stock(GTK_STOCK_PRINT);
+	g_signal_connect(print, "clicked", 
+			(GCallback) plan_lecheniya_print_clicked, treeView);
 	gtk_container_add(GTK_CONTAINER(toolbar), GTK_WIDGET(print));
 	gtk_widget_show(GTK_WIDGET(print));
 

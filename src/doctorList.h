@@ -2,7 +2,7 @@
  * File              : doctorList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.05.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -84,7 +84,7 @@ void doctor_list_update(GObject * delegate, prozubi_t *p){
 	gtk_list_store_clear(store);
 	
 	/* get list of patients */
-	prozubi_doctor_foreach(p, delegate, doctor_list_fill_table);
+	prozubi_doctor_foreach(p, NULL, delegate, doctor_list_fill_table);
 }
 
 static

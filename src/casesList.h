@@ -2,7 +2,7 @@
  * File              : casesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 31.05.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,6 +10,7 @@
 #define CASES_LIST_H
 
 #include <gtk/gtk.h>
+#include "prozubilib/passport.h"
 #include "prozubilib/cases.h"
 #include "casesEdit.h"
 
@@ -53,7 +54,6 @@ static void *
 cases_list_fill_table(
 		void *user_data,
 		void * parent,
-		bool has_children,
 		struct case_list_node *n
 		)
 {
@@ -89,6 +89,10 @@ cases_list_get_list(void *userdata, struct case_t * c){
 static void 
 cases_list_update(GObject * delegate, prozubi_t *p, char patientid[37]){
 	g_print("Update casesList\n");
+	if (!delegate){
+		g_print("Delegate is NULL\n");
+		return;
+	}
 	GtkTreeStore *store = g_object_get_data(delegate, "casesListStore");	
 
 	if (!p){
@@ -106,9 +110,9 @@ cases_list_update(GObject * delegate, prozubi_t *p, char patientid[37]){
 	gtk_tree_model_foreach (GTK_TREE_MODEL(store), 
 			cases_list_table_model_free, NULL);
 	gtk_tree_store_clear(store);
-	
+
 	/* get list of casess */
-	prozubi_cases_foreach(p, patientid, delegate, cases_list_get_list);
+	prozubi_cases_foreach(p, patientid, NULL, delegate, cases_list_get_list);
 }
 
 static void 
@@ -123,6 +127,7 @@ cases_list_row_activated(
 	GObject *delegate = userdata;	
 	
 	prozubi_t *p = g_object_get_data(G_OBJECT(treeview), "prozubi");
+	struct passport_t *patient = g_object_get_data(G_OBJECT(treeview), "patient");
 
 	GtkTreeModel *model = gtk_tree_view_get_model(treeview);
 	GtkTreeIter iter;
@@ -148,7 +153,7 @@ cases_list_row_activated(
 				CASES_LIST_COLUMN_KEY, &key, -1); 
 
 		/* todo: refresh casesEditWindow */
-		cases_edit_refresh(GTK_WIDGET(delegate), p, c, key, type, combobox_array);
+		cases_edit_refresh(GTK_WIDGET(delegate), p, patient, c, key, type, combobox_array);
 	}
 }
 
@@ -162,6 +167,7 @@ cases_list_cursor_changed(
 	GObject *delegate = userdata;	
 	
 	prozubi_t *p = g_object_get_data(G_OBJECT(treeview), "prozubi");
+	struct passport_t *patient = g_object_get_data(G_OBJECT(treeview), "patient");
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(treeview);
 	if (!selection){
@@ -206,7 +212,7 @@ cases_list_cursor_changed(
 				CASES_LIST_COLUMN_KEY, &key, -1); 
 
 		/* todo: refresh casesEditWindow */
-		cases_edit_refresh(GTK_WIDGET(delegate), p, c, key, type, combobox_array);
+		cases_edit_refresh(GTK_WIDGET(delegate), p,  patient, c, key, type, combobox_array);
 	}	
 }
 
@@ -338,7 +344,7 @@ cases_list_remove_clicked(gpointer user_data){
 
 
 static GtkWidget *
-cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
+cases_list_new(GtkWidget *casesWindow, prozubi_t *p, struct passport_t *patient){
 	/* set delegate */
 	GObject *delegate = G_OBJECT(casesWindow);
 
@@ -370,10 +376,11 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 	/* create new model */
 	GtkTreeStore *store = cases_list_table_model_new();
 	g_object_set_data(delegate, "casesListStore", store);
-	g_object_set_data(delegate, "patientid", patientid);
+	g_object_set_data(delegate, "patient", patient);
+	g_object_set_data(delegate, "patientid", patient->id);
 	g_object_set_data(delegate, "prozubi", p);
 
-	cases_list_update(delegate, p, patientid);
+	cases_list_update(delegate, p, patient->id);
 
 	/* set tree model for view */
 	//GtkWidget *view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
@@ -384,6 +391,7 @@ cases_list_new(GtkWidget *casesWindow, prozubi_t *p, char patientid[37]){
 			GTK_SELECTION_SINGLE);
 
 	g_object_set_data(G_OBJECT(treeView), "prozubi", p);
+	g_object_set_data(G_OBJECT(treeView), "patient", patient);
 	g_signal_connect(treeView, "row-activated", 
 			(GCallback) cases_list_row_activated, delegate);
 	

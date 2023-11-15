@@ -44,7 +44,7 @@ AC_SUBST(GTK_LIBS)
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
-po/Makefile.in
+src/prozubilib/Makefile
 ])
 
 AC_OUTPUT

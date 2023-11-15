@@ -2,7 +2,7 @@
  * File              : Xray.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 31.05.2023
- * Last Modified Date: 01.06.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -260,7 +260,7 @@ xray_reload(
 	)
 {
 	g_print("Xray reload for: %s\n", x->c->id);
-	prozubi_image_foreach(x->p, x->c->id, x, xray_images_foreach);
+	prozubi_image_foreach(x->p, x->c->id, NULL, x, xray_images_foreach);
 }
 
 void
@@ -384,9 +384,10 @@ xray_images_ask_to_remove(
 	for (i = 0; i < x->count; ++i) {
 		if (x->images[i]->selected){
 			hasSelected = true;
-			if (x->images[i]->image->title) 
+			if (x->images[i]->image->title){
 				strcat(title, x->images[i]->image->title);	
 				strcat(title, "\n");	
+			} 
 		}
 	}
 	if (!hasSelected)

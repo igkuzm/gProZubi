@@ -30,7 +30,7 @@ gprozubi_SOURCES = \
 	ComboBox.c ComboBox.h \
 	callbacks.c callbacks.h
 gprozubi_CFLAGS = $(GTK_CFLAGS)
-gprozubi_LDADD = $(INTLLIBS) $(GTK_LIBS) \
+gprozubi_LDADD = $(INTLLIBS) $(GTK_LIBS) -lm \
 								 prozubilib/*.o \
 								 prozubilib/kdata2/*.o \
 								 prozubilib/kdata2/cYandexDisk/*.o \

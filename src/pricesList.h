@@ -2,7 +2,7 @@
  * File              : pricesList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 23.05.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -96,7 +96,7 @@ prices_list_update(GObject * delegate, prozubi_t *p){
 	gtk_list_store_clear(store);
 	
 	/* get list of pricess */
-	prozubi_price_foreach(p, delegate, prices_list_fill_table);
+	prozubi_price_foreach(p, NULL, delegate, prices_list_fill_table);
 }
 
 static void 

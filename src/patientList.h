@@ -2,7 +2,7 @@
  * File              : patientList.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -12,6 +12,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "casesList.h"
 #include "interface.h"
@@ -49,9 +50,9 @@ static GtkListStore
 
 static void 
 patient_list_store_add(GtkListStore *store, struct passport_t * patient){
-	/*GDateTime *d = g_date_time_new_from_unix_local(patient->dateofbirth);*/
-  /*gchar *date_str = g_date_time_format(d,  "%d.%m.%Y");*/
-	gchar *date_str = "";
+	char date[11];
+	struct tm *tm = localtime(&patient->dateofbirth);
+	strftime(date, 11, "%d.%m.%Y", tm);
 
 	GtkTreeIter iter;
 	gtk_list_store_append(store, &iter);
@@ -59,16 +60,12 @@ patient_list_store_add(GtkListStore *store, struct passport_t * patient){
 			PATIENT_LIST_COLUMN_FAMILIYA,    patient->familiya,
 			PATIENT_LIST_COLUMN_IMIA,        patient->imia,
 			PATIENT_LIST_COLUMN_OTCHESTVO,   patient->otchestvo,
-			PATIENT_LIST_COLUMN_DATEOFBIRTH, date_str,
+			PATIENT_LIST_COLUMN_DATEOFBIRTH, date,
 			PATIENT_LIST_COLUMN_TEL,         patient->tel,
 			PATIENT_LIST_COLUMN_EMAIL,       patient->email,
 			PATIENT_LIST_COLUMN_COMMENT,     patient->comment,
 			PATIENT_LIST_POINTER,            patient,
 	-1);
-
-	/*g_date_time_unref(d);*/
-	/*if (date_str)*/
-		/*free(date_str);*/
 }
 
 static int 
@@ -106,7 +103,7 @@ patient_list_update(GObject * delegate, prozubi_t *p){
 	gtk_list_store_clear(store);
 	
 	/* get list of patients */
-	prozubi_passport_foreach(p, delegate, patient_list_fill_table);
+	prozubi_passport_foreach(p, NULL, delegate, patient_list_fill_table);
 }
 
 static void 
@@ -155,7 +152,7 @@ patient_list_row_activated(
 
 			/* start cases list */
 			prozubi_t *p = g_object_get_data(delegate, "prozubi");
-			cases_list_new(casesWindow, p, patient->id);
+			cases_list_new(casesWindow, p, patient);
 		}
 	}
 }

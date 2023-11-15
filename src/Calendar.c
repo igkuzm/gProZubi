@@ -2,12 +2,12 @@
  * File              : Calendar.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.06.2023
- * Last Modified Date: 07.06.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #include "Calendar.h"
-#include "prozubilib/date-time/time_local.h"
+#include <time.h>
 
 void
 cases_edit_date_entry_insert_text(
@@ -110,11 +110,11 @@ cases_edit_calendar_changed (GtkCalendar *widget, gpointer user_data) {
 		.tm_min = 0,
 		.tm_sec = 0,
 	};
-	time_t date = ya_mktime(&tm);
+	time_t date = mktime(&tm);
 
 	GtkWidget *entry = user_data;
-	char datestr[16];
-	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	char datestr[11];
+	strftime(datestr, 11, "%d.%m.%Y", &tm);
 	gtk_entry_set_text(GTK_ENTRY(entry), datestr);	
 	
 	prozubi_case_set_date(key, p, c, date);
@@ -145,10 +145,10 @@ cases_edit_date_entry_changed(GtkEntry *widget, gpointer   data){
 		.tm_min = 0,
 		.tm_sec = 0,
 	};
-	time_t date = ya_mktime(&tm);
+	time_t date = mktime(&tm);
 	
-	char datestr[16];
-	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	char datestr[11];
+	strftime(datestr, 11, "%d.%m.%Y", &tm);
 	gtk_entry_set_text(GTK_ENTRY(widget), datestr);	
 
 	gtk_calendar_select_month(GTK_CALENDAR(calendar), tm.tm_mon, tm.tm_year + 1900); 
@@ -174,12 +174,11 @@ calendar_new(
 	gtk_widget_show(bbox);
 	
 	time_t *date = prozubi_case_get(c, key);
-	struct tm tm;
-	sec_to_tm(*date, &tm);
+	struct tm *tm = localtime(date);
 
 	GtkWidget *entry = gtk_entry_new();
-	char datestr[16];
-	ya_strftime(datestr, 16, "%d.%m.%Y", &tm);
+	char datestr[11];
+	strftime(datestr, 11, "%d.%m.%Y", tm);
 	gtk_entry_set_text(GTK_ENTRY(entry), datestr);
 	gtk_container_add(GTK_CONTAINER (bbox), entry);	
 	gtk_widget_show(entry);
@@ -190,8 +189,8 @@ calendar_new(
 
 	
 	GtkWidget *calendar = gtk_calendar_new();
-	gtk_calendar_select_month(GTK_CALENDAR(calendar), tm.tm_mon, tm.tm_year + 1900); 
-	gtk_calendar_select_day(GTK_CALENDAR(calendar), tm.tm_mday); 
+	gtk_calendar_select_month(GTK_CALENDAR(calendar), tm->tm_mon, tm->tm_year + 1900); 
+	gtk_calendar_select_day(GTK_CALENDAR(calendar), tm->tm_mday); 
 	
 	g_object_set_data(G_OBJECT(calendar), "prozubi", p);
 	g_object_set_data(G_OBJECT(calendar), "case", c);

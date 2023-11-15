@@ -2,7 +2,7 @@
  * File              : interface.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 12.05.2023
- * Last Modified Date: 06.06.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -244,7 +244,7 @@ create_mainWindow (void)
 
   /* init database */
   prozubi_t *p = prozubi_init(
-			"ProZubi.sqlite",
+			"prozubi.sqlite",
 			token,
 			NULL, print_error,
 			NULL, print_error

@@ -2,7 +2,7 @@
  * File              : main.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.04.2023
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 19.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /*
@@ -10,11 +10,16 @@
  * Glade will not overwrite this file.
  */
 
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
+#include <errno.h>
+
+
 
 #include "interface.h"
 #include "getbundle.h"
@@ -91,15 +96,36 @@ main (int argc, char *argv[])
 		"nomenklatura.sqlite", 
 		NULL
 	};
-	//for (int i = 0; files[i]; ++i) {
-		//GFile *sfile = g_file_new_build_filename(bundle,  files[i], NULL);
-		//GFile *dfile = g_file_new_build_filename(workdir, files[i], NULL);
+	for (int i = 0; files[i]; ++i) {
+		char src_path[BUFSIZ];
+		sprintf(src_path, "%s/%s", bundle, files[i]);
+		FILE *src = g_fopen(src_path, "rb");
 		
-		//GError *error = NULL;
-		//g_file_copy(sfile, dfile, 0, NULL, NULL, NULL, &error);
-		//if (error)
-			//printf("g_file_copy error: %s\n", error->message);
-	//}
+		char dest_path[BUFSIZ];
+		sprintf(dest_path, "%s/%s", workdir, files[i]);
+		FILE *dest = g_fopen(dest_path, "wb");
+
+		if (src && dest){
+			// copy files
+			char buf[BUFSIZ];
+			while (fread(buf, sizeof(buf), 1, src) > 0)
+				fwrite(buf, sizeof(buf), 1, dest);
+			
+			g_print("copy %s to %s: %s\n",
+					src_path, dest_path, strerror(errno));
+
+			// close files
+			fclose(src);
+			fclose(dest);
+		} else {
+			if (!src)
+				g_print("can't open file: %s: %s\n",
+						src_path, strerror(errno));
+			if (!dest)
+				g_print("can't open file: %s: %s\n",
+						dest_path, strerror(errno));
+		}
+	}
 
 	//free bundle var
 	free(bundle);

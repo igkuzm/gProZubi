@@ -2,7 +2,7 @@
  * File              : casesEdit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 01.05.2023
- * Last Modified Date: 01.06.2023
+ * Last Modified Date: 05.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,6 +13,7 @@
 #include <string.h>
 #include "cairo.h"
 #include "glibconfig.h"
+#include "prozubilib/passport.h"
 #include "prozubilib/cases.h"
 #include "prozubilib/planlecheniya.h"
 #include "planLecheniya.h"
@@ -30,6 +31,7 @@ static GtkWidget *
 cases_edit_refresh(
 		GtkWidget *casesWindow, 
 		prozubi_t *p, 
+		struct passport_t *patient,
 		struct case_t *c, 
 		CASES key, 
 		CASES_LIST_TYPE type,
@@ -77,7 +79,7 @@ cases_edit_refresh(
 
 		case CASES_LIST_TYPE_PLANLECHENIYA:
 			{
-				return plan_lecheniya_new(casesEditFrame, c->planlecheniya, p, c);	
+				return plan_lecheniya_new(casesEditFrame, c->planlecheniya, p, patient, c);	
 			}			
 
 		case CASES_LIST_TYPE_XRAY:
